@@ -1,0 +1,31 @@
+USE [URCS]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_GenerateEValuesXML]    Script Date: 12/03/2014 12:15:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [dbo].[usp_GenerateEValuesXML] (@Year AS CHAR(4), @Output AS XML OUTPUT)
+AS
+BEGIN
+
+DECLARE @comment NVARCHAR(100)
+DECLARE @xml_var NVARCHAR(MAX)  
+
+SET @comment = '<!-- This unit cost file created was on ' + 
+					CONVERT(VARCHAR(30),SYSDATETIME(),101) + ' at ' + 
+					CONVERT(VARCHAR(30),SYSDATETIME(),108) + ' -->' 
+
+SET @xml_var = 
+	(SELECT SHORT_NAME AS Name, Name as Title, (SELECT * FROM ufn_EValues (@Year,l.RR_ID) FOR XML RAW('X'),TYPE)
+	 FROM UR_CLASS1_RAIL_LIST l
+	 WHERE RR_ID <>0
+	 FOR XML RAW ('Railroad'), ROOT('UnitCostData'))
+
+SET @Output = CAST(@comment + REPLACE(REPLACE(@xml_var, 'X Node="',''),'" C1=',' C1=') AS XML)
+
+RETURN 0
+
+END
+

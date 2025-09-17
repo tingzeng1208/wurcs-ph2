@@ -1,0 +1,23 @@
+USE [URCS]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_WriteEtableDataForMakeWhole]    Script Date: 12/03/2014 12:24:07 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		David Aholt, Philotechnia, L.L.C
+-- Create date: 2011-12-19 10:00:39.193
+-- Description:	Data output for URCS Program
+-- =============================================
+ALTER PROCEDURE [dbo].[usp_WriteEtableDataForMakeWhole](@Year varchar(4),
+				@RR int,
+				@eCode_id int,
+				@eCodeValue float)
+AS
+SET NOCOUNT ON;
+
+--UPDATE [URCS].[dbo].[U_ETABLES] SET Value = @ecodeValue WHERE eCode_id = @eCode_id and Year = @year and RR_Id = @RR
+
+INSERT UT_MAKEWHOLE_FACTORS
+SELECT @Year, @RR, @eCode_id, @eCodeValue

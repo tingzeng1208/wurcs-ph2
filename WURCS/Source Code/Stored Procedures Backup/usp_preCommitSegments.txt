@@ -1,0 +1,20 @@
+USE [URCS]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_preCommitSegments]    Script Date: 12/03/2014 12:19:35 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		David Aholt, Philotechnia, L.L.C
+-- Create date: 2012-1-09 12:00:20.180
+-- Description:	Data write for URCS Program
+-- =============================================
+ALTER PROCEDURE [dbo].[usp_preCommitSegments]
+AS
+SET NOCOUNT ON;
+
+UPDATE U_CURRENT_SEGMENTS
+SET RR_VC = 0
+
+

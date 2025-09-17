@@ -1,0 +1,36 @@
+USE [URCS]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_GetCRPSEGValues]    Script Date: 12/03/2014 12:16:21 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		David Aholt, Philotechnia, L.L.C
+-- Create date: 2011-12-19 10:00:39.193
+-- Description:	Data retrival for URCS Program
+-- =============================================
+ALTER PROCEDURE [dbo].[usp_GetCRPSEGValues]
+AS
+SET NOCOUNT ON;
+
+SELECT SerialNum,
+		SegmentNumber,
+		ShipmentSize,
+		SegmentType,
+		CarType,
+		[Ownership],
+		RR_ID,
+		RR_Region,
+		Num_Cars,
+		L205,
+		L251,
+		L252,
+		L304,
+		L305,
+		L308,
+		L323,
+		L324,
+		L696,
+		L699
+FROM [URCS].[dbo].[U_CRPSEG]

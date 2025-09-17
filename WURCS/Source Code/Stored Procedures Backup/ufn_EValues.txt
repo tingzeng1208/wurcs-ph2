@@ -1,0 +1,27 @@
+USE [URCS]
+GO
+/****** Object:  UserDefinedFunction [dbo].[ufn_EValues]    Script Date: 12/03/2014 12:25:12 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+ALTER FUNCTION [dbo].[ufn_EValues] 
+(@Year AS CHAR(4), @RRID AS TINYINT)
+RETURNS TABLE
+AS
+RETURN
+WITH PivotData AS
+(
+	SELECT EPartXML + LineA AS Node, Code, Value
+	FROM U_EVALUES v INNER JOIN UR_ECODE c ON v.eCode_id = c.eCode_id
+	WHERE Year = @Year AND RR_Id = @RRID
+)
+SELECT Node, [C1],[C2],[C3],[C4],[C5],[C6],[C7],[C8],[C9],[C10],[C11],[C12],[C13],[C14],[C15],[C16],[C17],[C18],[C19],[C20],[C21],[C22],[C23],[C24],[C25],[C26],[C27],[C28],[C29]
+FROM PivotData
+	PIVOT (MAX(Value) FOR Code IN ([C1],[C2],[C3],[C4],[C5],[C6],[C7],[C8],[C9],[C10],[C11],[C12],[C13],[C14],[C15],[C16],[C17],[C18],[C19],[C20],[C21],[C22],[C23],[C24],[C25],[C26],[C27],[C28],[C29])) AS P
+
+
+

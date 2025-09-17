@@ -1,0 +1,17 @@
+USE [URCS]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_GetEtables]    Script Date: 12/03/2014 12:17:21 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		David Aholt, Philotechnia, L.L.C
+-- Create date: 2011-11-09 14:00:39.193
+-- Description:	Data retrival for URCS Program
+-- =============================================
+ALTER PROCEDURE [dbo].[usp_GetEtables] (@year int)
+AS
+SET NOCOUNT ON;
+
+SELECT * FROM U_ETABLES WHERE [Year] = @year

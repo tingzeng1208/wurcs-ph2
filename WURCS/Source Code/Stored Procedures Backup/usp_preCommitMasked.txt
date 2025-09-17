@@ -1,0 +1,25 @@
+USE [URCS]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_preCommitMasked]    Script Date: 12/03/2014 12:18:16 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		David Aholt, Philotechnia, L.L.C
+-- Create date: 2012-1-09 12:00:20.180
+-- Description:	Data write for URCS Program
+-- =============================================
+ALTER PROCEDURE [dbo].[usp_preCommitMasked]
+AS
+SET NOCOUNT ON;
+
+UPDATE U_CURRENT_MASKED SET Total_VC = 0,
+							RR1_VC = 0,
+							RR2_VC = 0,
+							RR3_VC = 0,
+							RR4_VC = 0,
+							RR5_VC = 0,
+							RR6_VC = 0,
+							RR7_VC = 0,
+							RR8_VC = 0

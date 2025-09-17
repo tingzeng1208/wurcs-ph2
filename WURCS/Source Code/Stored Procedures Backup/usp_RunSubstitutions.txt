@@ -1,0 +1,117 @@
+USE [URCS]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_RunSubstitutions]    Script Date: 12/03/2014 12:20:05 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+  ALTER PROCEDURE [dbo].[usp_RunSubstitutions](@Year CHAR(4), @RR_ID TINYINT)
+  AS
+  BEGIN
+  
+    DECLARE @NotesText CHAR(55) = 'No substitution - initial value within reasonable range';
+    DECLARE @RegionID TINYINT;  
+    DECLARE @RR_NAME VARCHAR(5);
+    DECLARE @Region_NAME VARCHAR(5);
+	
+	SELECT @RegionID = CASE WHEN RR.RR_ID = RG.RR_ID THEN RG.Other_RR_ID ELSE RG.RR_ID END
+	FROM UR_CLASS1_RAIL_LIST RR INNER JOIN 
+		(SELECT Region_ID, RR_ID, (SELECT TOP 1 RR_ID FROM UR_CLASS1_RAIL_LIST WHERE RRICC > 900000 AND RR_ID > 0 AND RR_ID <> S.RR_ID) Other_RR_ID
+		 FROM UR_CLASS1_RAIL_LIST S
+		 WHERE RRICC > 900000 AND RR_ID > 0) RG ON RR.REGION_ID = RG.REGION_ID
+	WHERE RR.RR_ID = @RR_ID
+	
+	SELECT TOP 1 @RR_NAME = SHORT_NAME FROM UR_CLASS1_RAIL_LIST 
+	WHERE RR_ID = @RR_ID 
+	
+	SELECT TOP 1 @Region_NAME = SHORT_NAME FROM UR_CLASS1_RAIL_LIST 
+	WHERE RR_ID = @RegionID 
+  
+    -- Run rules 1 through 13
+	UPDATE OriginalValues SET OriginalValues.Final_Value = ReplaceValues.Final_Value, 
+							  Notes = 'Updated with ' + ReplaceCodes.eCode + ' from ' + @RR_NAME + ' (RR_ID = ' + CAST(ReplaceValues.RR_id as VARCHAR(10)) + ')'
+	FROM (U_ESUBSTITUTIONS OriginalValues INNER JOIN 
+		  UR_ECODE OriginalCodes ON OriginalValues.eCode_id = OriginalCodes.eCode_ID AND OriginalCodes.eLine=201) INNER JOIN 
+		 (U_ESUBSTITUTIONS ReplaceValues INNER JOIN 
+		  UR_ECODE ReplaceCodes ON ReplaceValues.eCode_id = ReplaceCodes.eCode_ID AND ReplaceCodes.eLine=202) 
+	ON OriginalValues.RR_id = ReplaceValues.RR_id AND OriginalValues.Year = ReplaceValues.Year AND OriginalCodes.eCode = REPLACE(ReplaceCodes.eCode,'2C','1C')
+	WHERE OriginalValues.RR_id = @RR_ID AND OriginalValues.Year = @Year AND OriginalCodes.ePart = 'E1'
+	
+	-- Run rules 14 through 17
+	UPDATE OriginalValues SET OriginalValues.Final_Value = ReplaceValues.Final_Value, 
+							  Notes = 'Updated with ' + ReplaceCodes.eCode + ' from ' + @RR_NAME + ' (RR_ID = ' + CAST(ReplaceValues.RR_id as VARCHAR(10)) + ')'
+	FROM (U_ESUBSTITUTIONS OriginalValues INNER JOIN 
+		  UR_ECODE OriginalCodes ON OriginalValues.eCode_id = OriginalCodes.eCode_ID AND OriginalCodes.eLine=101) INNER JOIN 
+		 (U_ESUBSTITUTIONS ReplaceValues INNER JOIN 
+		  UR_ECODE ReplaceCodes ON ReplaceValues.eCode_id = ReplaceCodes.eCode_ID AND ReplaceCodes.eLine=102) 
+	ON OriginalValues.RR_id = ReplaceValues.RR_id AND OriginalValues.Year = ReplaceValues.Year AND OriginalCodes.eCode = REPLACE(ReplaceCodes.eCode,'2C','1C')
+	WHERE OriginalValues.RR_id = @RR_ID AND OriginalValues.Year = @Year AND OriginalCodes.ePart = 'E2' AND OriginalCodes.eColumn IN (2,3,4,24)
+	
+	-- Run rules 18 through 38
+	UPDATE OriginalValues SET OriginalValues.Final_Value = CASE WHEN OriginalValues.Final_Value <= 0 THEN ReplaceValues.Final_Value ELSE OriginalValues.Final_Value END, 
+							  Notes = CASE WHEN OriginalValues.Final_Value <= 0 THEN 'Updated with ' + ReplaceCodes.eCode + ' from ' + @Region_NAME + ' (RR_ID = ' + CAST(ReplaceValues.RR_id as VARCHAR(10)) + ')'
+																				ELSE CASE WHEN OriginalValues.Notes IS NULL THEN @NotesText ELSE OriginalValues.Notes END END
+	FROM (U_ESUBSTITUTIONS OriginalValues INNER JOIN 
+		  UR_ECODE OriginalCodes ON OriginalValues.eCode_id = OriginalCodes.eCode_ID) INNER JOIN 
+		 (U_ESUBSTITUTIONS ReplaceValues INNER JOIN 
+		  UR_ECODE ReplaceCodes ON ReplaceValues.eCode_id = ReplaceCodes.eCode_ID) 
+	ON OriginalValues.Year = ReplaceValues.Year AND OriginalCodes.eCode_id = ReplaceCodes.eCode_id
+	WHERE OriginalValues.RR_id = @RR_ID AND ReplaceValues.RR_id = @RegionID AND OriginalValues.Year = @Year  
+		  AND OriginalCodes.eLine BETWEEN 200 AND 300 AND OriginalCodes.eColumn = 13 AND OriginalCodes.ePart = 'E1'
+		  
+	-- Run rules 39 through 56
+	UPDATE OriginalValues SET OriginalValues.Final_Value = CASE WHEN OriginalValues.Final_Value < 1 OR OriginalValues.Final_Value > 3 THEN ReplaceValues.Final_Value ELSE OriginalValues.Final_Value END, 
+							  Notes = CASE WHEN OriginalValues.Final_Value < 1 OR OriginalValues.Final_Value > 3 THEN 'Updated with ' + ReplaceCodes.eCode + ' from ' + @Region_NAME + ' (RR_ID = ' + CAST(ReplaceValues.RR_id as VARCHAR(10)) + ')'
+																												 ELSE CASE WHEN OriginalValues.Notes IS NULL THEN @NotesText ELSE OriginalValues.Notes END END
+	FROM (U_ESUBSTITUTIONS OriginalValues INNER JOIN 
+		  UR_ECODE OriginalCodes ON OriginalValues.eCode_id = OriginalCodes.eCode_ID) INNER JOIN 
+		 (U_ESUBSTITUTIONS ReplaceValues INNER JOIN 
+		  UR_ECODE ReplaceCodes ON ReplaceValues.eCode_id = ReplaceCodes.eCode_ID) 
+	ON OriginalValues.Year = ReplaceValues.Year AND OriginalCodes.eCode_id = ReplaceCodes.eCode_id
+	WHERE OriginalValues.RR_id = @RR_ID AND ReplaceValues.RR_id = @RegionID AND OriginalValues.Year = @Year  
+		  AND OriginalCodes.eLine BETWEEN 100 AND 200 AND OriginalCodes.eColumn = 3 AND OriginalCodes.ePart = 'E2'
+		  
+	-- Run rules 58 through 59
+	UPDATE OriginalValues SET OriginalValues.Final_Value = ReplaceValues.Final_Value, 
+							  Notes = 'Updated with ' + ReplaceCodes.eCode + ' from ' + @RR_NAME + ' (RR_ID = ' + CAST(ReplaceValues.RR_id as VARCHAR(10)) + ')'
+	FROM (U_ESUBSTITUTIONS OriginalValues INNER JOIN 
+		  UR_ECODE OriginalCodes ON OriginalValues.eCode_id = OriginalCodes.eCode_ID AND OriginalCodes.eColumn = 2) INNER JOIN 
+		 (U_ESUBSTITUTIONS ReplaceValues INNER JOIN 
+		  UR_ECODE ReplaceCodes ON ReplaceValues.eCode_id = ReplaceCodes.eCode_ID AND ReplaceCodes.eColumn = 13 ) 
+	ON OriginalValues.Year = ReplaceValues.Year AND OriginalValues.RR_id = ReplaceValues.RR_id AND OriginalCodes.eLine = ReplaceCodes.eLine
+	WHERE OriginalValues.RR_id = @RR_ID AND OriginalValues.Year = @Year  
+		  AND OriginalCodes.eLine IN (215,216) AND OriginalCodes.ePart = 'E1'
+		  
+	-- Run rules 61 through 113 (excluding 87)
+	UPDATE OriginalValues SET OriginalValues.Final_Value = ReplaceValues.Final_Value, 
+							  Notes = 'Updated with ' + ReplaceCodes.eCode + ' from ' + @RR_NAME + ' (RR_ID = ' + CAST(ReplaceValues.RR_id as VARCHAR(10)) + ')'
+	FROM (U_ESUBSTITUTIONS OriginalValues INNER JOIN 
+		  UR_ECODE OriginalCodes ON OriginalValues.eCode_id = OriginalCodes.eCode_ID AND OriginalCodes.eLine IN (115,116)) INNER JOIN 
+		 (U_ESUBSTITUTIONS ReplaceValues INNER JOIN 
+		  UR_ECODE ReplaceCodes ON ReplaceValues.eCode_id = ReplaceCodes.eCode_ID AND ReplaceCodes.eLine = 117) 
+	ON OriginalValues.Year = ReplaceValues.Year AND OriginalValues.RR_id = ReplaceValues.RR_id AND OriginalCodes.eColumn = ReplaceCodes.eColumn AND OriginalCodes.EPart = ReplaceCodes.EPart
+	WHERE OriginalValues.RR_id = @RR_ID AND OriginalValues.Year = @Year AND OriginalCodes.ePart = 'E2' 
+		AND (OriginalCodes.eColumn = 2 OR OriginalCodes.eColumn BETWEEN 5 AND 29)
+		
+	-- Run rule 114 
+	UPDATE OriginalValues SET OriginalValues.Final_Value = CASE WHEN OriginalValues.Final_Value = 1 THEN ReplaceValues.Final_Value ELSE OriginalValues.Final_Value END, 
+							  Notes = CASE WHEN OriginalValues.Final_Value = 1 THEN 'Updated with ' + ReplaceCodes.eCode + ' from ' + @RR_NAME + ' (RR_ID = ' + CAST(ReplaceValues.RR_id as VARCHAR(10)) + ')'
+																			   ELSE CASE WHEN OriginalValues.Notes IS NULL THEN @NotesText ELSE OriginalValues.Notes END END
+		FROM (U_ESUBSTITUTIONS OriginalValues INNER JOIN 
+		  UR_ECODE OriginalCodes ON OriginalValues.eCode_id = OriginalCodes.eCode_ID AND OriginalCodes.eColumn = 8) INNER JOIN 
+		 (U_ESUBSTITUTIONS ReplaceValues INNER JOIN 
+		  UR_ECODE ReplaceCodes ON ReplaceValues.eCode_id = ReplaceCodes.eCode_ID AND ReplaceCodes.eColumn = 4) 
+	ON OriginalValues.Year = ReplaceValues.Year AND OriginalValues.RR_id = ReplaceValues.RR_id AND OriginalCodes.eLine = ReplaceCodes.eLine
+	WHERE OriginalValues.RR_id = @RR_ID AND OriginalValues.Year = @Year AND OriginalCodes.ePart = 'E2' AND OriginalCodes.eLine = 111
+	
+	-- Run rule 115
+	UPDATE OriginalValues SET OriginalValues.Final_Value = CASE WHEN OriginalValues.Final_Value <> 4162 THEN 4162 ELSE OriginalValues.Final_Value END, 
+		   Notes = CASE WHEN OriginalValues.Final_Value <> 4162 THEN 'Updated with value 4162' ELSE @NotesText END
+	FROM U_ESUBSTITUTIONS OriginalValues INNER JOIN 
+		 UR_ECODE OriginalCodes ON OriginalValues.eCode_id = OriginalCodes.eCode_ID AND OriginalCodes.eColumn = 23
+	WHERE OriginalValues.RR_id = @RR_ID AND OriginalValues.Year = @Year AND OriginalCodes.ePart = 'E2' AND OriginalCodes.eLine = 111 
+	
+  END
+

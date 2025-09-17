@@ -1,0 +1,35 @@
+USE [URCS]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_WriteCRPRES]    Script Date: 12/03/2014 12:20:46 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		David Aholt, Philotechnia, L.L.C
+-- Create date: 2012-1-09 12:00:20.180
+-- Description:	Data write for URCS Program
+-- =============================================
+ALTER PROCEDURE [dbo].[usp_WriteCRPRES](@c1 integer,
+	  @c2 float,
+	  @c3 float,
+	  @c4 float,
+	  @c5 float,
+	  @c6 float,
+	  @c7 float,
+	  @c8 float,
+	  @c9 float,
+	  @c10 float,
+	  @c11 float,
+	  @c12 float,
+	  @c13 float,
+	  @c14 float,
+	  @c15 float,
+	  @c16 float,
+	  @c17 float,
+	  @c18 float,
+      @c19 float)
+AS
+SET NOCOUNT ON;
+
+Insert Into U_CRPRES Values(@c1,@c2,@c3,@c4,@c5,@c6,@c7,@c8,@c9,@c10,@c11,@c12,@c13,@c14,@c15,@c16,@c17,@c18,@c19)

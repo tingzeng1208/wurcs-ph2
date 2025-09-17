@@ -1,0 +1,32 @@
+﻿<x:numFmts>
+  <x:numFmt numFmtId="164" formatCode="#,##0.00\ &quot;€&quot;" />
+</x:numFmts>
+<x:fonts>
+  <x:font>
+    <x:sz val="11" />
+    <x:name val="Calibri" />
+  </x:font>
+</x:fonts>
+<x:fills>
+  <x:fill>
+    <x:patternFill patternType="none" />
+  </x:fill>
+</x:fills>
+<x:borders>
+  <x:border>
+    <x:left />
+    <x:right />
+    <x:top />
+    <x:bottom />
+    <x:diagonal />
+  </x:border>
+</x:borders>
+<x:cellStyleXfs>
+  <x:xf numFmtId="0" fontId="0" fillId="0" borderId="0" />
+</x:cellStyleXfs>
+<x:cellXfs>
+  <x:xf numFmtId="0" xfId="0" />
+  <x:xf numFmtId="22" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" />
+  <x:xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" />
+  <x:xf numFmtId="10" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" />
+</x:cellXfs>

@@ -1,0 +1,728 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{963B86DF-F7C8-4871-A2A2-CD9483DA288F}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <StartupObject>WURCS.My.MyApplication</StartupObject>
+    <RootNamespace>WURCS</RootNamespace>
+    <AssemblyName>WURCS</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+    <MyType>WindowsForms</MyType>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>C:\Users\Sandersm\Desktop\WURCS\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>3</ApplicationRevision>
+    <ApplicationVersion>4.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>WURCS.xml</DocumentationFile>
+    <NoWarn>41999,42016,42017,42018,42019,42020,42021,42022,42025,42032,42036</NoWarn>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <CodeAnalysisIgnoreGeneratedCode>false</CodeAnalysisIgnoreGeneratedCode>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DocumentationFile>WURCS.xml</DocumentationFile>
+    <NoWarn>41999,42016,42017,42018,42019,42020,42021,42022,42025,42032,42036</NoWarn>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionExplicit>On</OptionExplicit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionCompare>Binary</OptionCompare>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionStrict>Off</OptionStrict>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionInfer>On</OptionInfer>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>01A8616491CF86065521AB42D19681F2B9E9976B</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>URCS And Waybills_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>true</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>My Project\app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>false</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>train-5-multi-size.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DocumentationFile>WURCS.xml</DocumentationFile>
+    <NoWarn>41999,42016,42017,42018,42019,42020,42021,42022,42025,42032,42036</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <CodeAnalysisIgnoreGeneratedCode>false</CodeAnalysisIgnoreGeneratedCode>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DocumentationFile>WURCS.xml</DocumentationFile>
+    <Optimize>true</Optimize>
+    <NoWarn>41999,42016,42017,42018,42019,42020,42021,42022,42025,42032,42036</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Office.Interop.Excel, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>U:\Software\Visual Studio Tools for Office\PIA\Office15\Microsoft.Office.Interop.Excel.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="ProgBar">
+      <HintPath>Resources\ProgBarPlus\ProgBar\bin\Release\ProgBar.dll</HintPath>
+    </Reference>
+    <Reference Include="SpreadsheetGear2017.Core, Version=8.3.2.102, Culture=neutral, PublicKeyToken=39c186f5904944ec, processorArchitecture=MSIL">
+      <HintPath>bin\Release\SpreadsheetGear2017.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="SpreadsheetGear2017.Drawing, Version=8.3.2.102, Culture=neutral, PublicKeyToken=39c186f5904944ec, processorArchitecture=MSIL">
+      <HintPath>bin\Release\SpreadsheetGear2017.Drawing.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Data" />
+    <Import Include="System.Data.OleDb" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.IO" />
+    <Import Include="System.Numerics" />
+    <Import Include="System.Windows.Forms" />
+    <Import Include="System.Linq" />
+    <Import Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Application.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Application.myapp</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="Settings.vb" />
+    <Compile Include="Source Code\DataPrepForms\Convert_To_XML_Legacy.Designer.vb">
+      <DependentUpon>Convert_To_XML_Legacy.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\Convert_To_XML_Legacy.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\CSM_Data_Loader.Designer.vb">
+      <DependentUpon>CSM_Data_Loader.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\CSM_Data_Loader.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\Interim_Data_Loader.Designer.vb">
+      <DependentUpon>Interim_Data_Loader.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\Interim_Data_Loader.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\Marks_Data_Loader.Designer.vb">
+      <DependentUpon>Marks_Data_Loader.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\Marks_Data_Loader.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\PUWS_Table_Update.Designer.vb">
+      <DependentUpon>PUWS_Table_Update.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\PUWS_Table_Update.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\STCC_Code_Table_Loader.Designer.vb">
+      <DependentUpon>STCC_Code_Table_Loader.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\STCC_Code_Table_Loader.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\Global Variables and Routines\Class_445_Waybill.vb" />
+    <Compile Include="Source Code\Global Variables and Routines\Class_913_Waybill.vb" />
+    <Compile Include="Source Code\Global Variables and Routines\Class_PUWS.vb" />
+    <Compile Include="Source Code\Global Variables and Routines\MsgForm.Designer.vb">
+      <DependentUpon>MsgForm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\Global Variables and Routines\MsgForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\Global Variables and Routines\Class_ThruState.vb" />
+    <Compile Include="Source Code\Legacy Costing\Legacy_Costing.Designer.vb">
+      <DependentUpon>Legacy_Costing.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\Legacy Costing\Legacy_Costing.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\Phase2\clsDBManager.vb" />
+    <Compile Include="Source Code\Phase2\frmPhase2Main.Designer.vb">
+      <DependentUpon>frmPhase2Main.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\Phase2\frmPhase2Main.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\Phase2\Logger.vb" />
+    <Compile Include="Source Code\Phase2\modCreateExcelSpreadsheet.vb" />
+    <Compile Include="Source Code\Phase2\modPreparePhase2InputData.vb" />
+    <Compile Include="Source Code\PostProcessingForms\frm_AddMakeWholeToXML.Designer.vb">
+      <DependentUpon>frm_AddMakeWholeToXML.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\PostProcessingForms\frm_AddMakeWholeToXML.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\PostProcessingForms\frm_XML_Comparison.Designer.vb">
+      <DependentUpon>frm_XML_Comparison.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\PostProcessingForms\frm_XML_Comparison.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\PostProcessingForms\frm_XML_Data_Loader.Designer.vb">
+      <DependentUpon>frm_XML_Data_Loader.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\PostProcessingForms\frm_XML_Data_Loader.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\PostProcessingForms\frm_Productivity.Designer.vb">
+      <DependentUpon>frm_Productivity.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\PostProcessingForms\frm_Productivity.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\PreprocessingForms\frm_R-1_Balance.Designer.vb">
+      <DependentUpon>frm_R-1_Balance.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\PreprocessingForms\frm_R-1_Balance.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\AAR_Index_Loader.Designer.vb">
+      <DependentUpon>AAR_Index_Loader.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\AAR_Index_Loader.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\Border_Crossing_Segments.Designer.vb">
+      <DependentUpon>Border_Crossing_Segments.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\Border_Crossing_Segments.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\TOFC_Load_Factors_Loader.Designer.vb">
+      <DependentUpon>TOFC_Load_Factors_Loader.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\TOFC_Load_Factors_Loader.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\Cost_of_Capital_Loader.Designer.vb">
+      <DependentUpon>Cost_of_Capital_Loader.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\Cost_of_Capital_Loader.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\CS-54_Data_Loader.Designer.vb">
+      <DependentUpon>CS-54_Data_Loader.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\CS-54_Data_Loader.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\Initialize_URCS_Year.Designer.vb">
+      <DependentUpon>Initialize_URCS_Year.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\Initialize_URCS_Year.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\Loss_Damage_Loader.Designer.vb">
+      <DependentUpon>Loss_Damage_Loader.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\Loss_Damage_Loader.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\QCS_Loader.Designer.vb">
+      <DependentUpon>QCS_Loader.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\QCS_Loader.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\R1_Data_Load.Designer.vb">
+      <DependentUpon>R1_Data_Load.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\R1_Data_Load.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\Segments_Table_Builder.Designer.vb">
+      <DependentUpon>Segments_Table_Builder.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\Segments_Table_Builder.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\Tare_Weight_Loader.Designer.vb">
+      <DependentUpon>Tare_Weight_Loader.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\Tare_Weight_Loader.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\UMF_Load_Legacy.Designer.vb">
+      <DependentUpon>UMF_Load_Legacy.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\UMF_Load_Legacy.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\Unmasked_Table_Update.Designer.vb">
+      <DependentUpon>Unmasked_Table_Update.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\Unmasked_Table_Update.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\Waybill_Data_Loader.Designer.vb">
+      <DependentUpon>Waybill_Data_Loader.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\Waybill_Data_Loader.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\WayRRR_Verification.Designer.vb">
+      <DependentUpon>WayRRR_Verification.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\DataPrepForms\WayRRR_Verification.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\Global Variables and Routines\Class_Segments.vb" />
+    <Compile Include="Source Code\Global Variables and Routines\Class_URCS_AARIndex.vb" />
+    <Compile Include="Source Code\Global Variables and Routines\Class_Waybill.vb" />
+    <Compile Include="Source Code\Global Variables and Routines\Global_Variables.vb" />
+    <Compile Include="Source Code\Global Variables and Routines\Class_URCS_Index_Record.vb" />
+    <Compile Include="Source Code\Global Variables and Routines\Masking_Routines.vb" />
+    <Compile Include="Source Code\Global Variables and Routines\Sample_Generator_Routines.vb" />
+    <Compile Include="Source Code\Global Variables and Routines\SQL Routines.vb" />
+    <Compile Include="Source Code\Global Variables and Routines\Unmasking_Routines.vb" />
+    <Compile Include="Source Code\Global Variables and Routines\URCS_Routines.vb" />
+    <Compile Include="Source Code\Global Variables and Routines\Waybill_Class_Loader.vb" />
+    <Compile Include="Source Code\Menu_DataPrep.Designer.vb">
+      <DependentUpon>Menu_DataPrep.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\Menu_DataPrep.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\Menu_Main.Designer.vb">
+      <DependentUpon>Menu_Main.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\Menu_Main.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\Menu_PostProcessing.Designer.vb">
+      <DependentUpon>Menu_PostProcessing.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\Menu_PostProcessing.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\Menu_WBGeneratorsAndUtilities.Designer.vb">
+      <DependentUpon>Menu_WBGeneratorsAndUtilities.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\Menu_WBGeneratorsAndUtilities.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\Phase3\frmPhase3Main.Designer.vb">
+      <DependentUpon>frmPhase3Main.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\Phase3\frmPhase3Main.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\Menu_PreProcessing_Checks.Designer.vb">
+      <DependentUpon>Menu_PreProcessing_Checks.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\Menu_PreProcessing_Checks.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\PreprocessingForms\frm_Trans_Comparison.Designer.vb">
+      <DependentUpon>frm_Trans_Comparison.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\PreprocessingForms\frm_Trans_Comparison.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\WBGenerators\Annual_WB_Generator.Designer.vb">
+      <DependentUpon>Annual_WB_Generator.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\WBGenerators\Annual_WB_Generator.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\WBGenerators\Participatory_RR_WB_Generator.Designer.vb">
+      <DependentUpon>Participatory_RR_WB_Generator.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\WBGenerators\Participatory_RR_WB_Generator.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\WBGenerators\PUWS_Generator.Designer.vb">
+      <DependentUpon>PUWS_Generator.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\WBGenerators\PUWS_Generator.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\WBGenerators\QuarterlyMaskingUtil.Designer.vb">
+      <DependentUpon>QuarterlyMaskingUtil.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\WBGenerators\QuarterlyMaskingUtil.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\WBGenerators\RR_WB_Generator.Designer.vb">
+      <DependentUpon>RR_WB_Generator.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\WBGenerators\RR_WB_Generator.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\WBGenerators\State_WB_Generator.Designer.vb">
+      <DependentUpon>State_WB_Generator.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\WBGenerators\State_WB_Generator.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\WBGenerators\Trim_SQL_Field_Values.Designer.vb">
+      <DependentUpon>Trim_SQL_Field_Values.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\WBGenerators\Trim_SQL_Field_Values.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source Code\WBGenerators\WB_By_STCC_Generator.Designer.vb">
+      <DependentUpon>WB_By_STCC_Generator.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Source Code\WBGenerators\WB_By_STCC_Generator.vb">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\DataPrepForms\AAR_Index_Loader.resx">
+      <DependentUpon>AAR_Index_Loader.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\DataPrepForms\Border_Crossing_Segments.resx">
+      <DependentUpon>Border_Crossing_Segments.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\DataPrepForms\Convert_To_XML_Legacy.resx">
+      <DependentUpon>Convert_To_XML_Legacy.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\DataPrepForms\CSM_Data_Loader.resx">
+      <DependentUpon>CSM_Data_Loader.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\DataPrepForms\Interim_Data_Loader.resx">
+      <DependentUpon>Interim_Data_Loader.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\DataPrepForms\Marks_Data_Loader.resx">
+      <DependentUpon>Marks_Data_Loader.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\DataPrepForms\PUWS_Table_Update.resx">
+      <DependentUpon>PUWS_Table_Update.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\DataPrepForms\STCC_Code_Table_Loader.resx">
+      <DependentUpon>STCC_Code_Table_Loader.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\DataPrepForms\TOFC_Load_Factors_Loader.resx">
+      <DependentUpon>TOFC_Load_Factors_Loader.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\DataPrepForms\Cost_of_Capital_Loader.resx">
+      <DependentUpon>Cost_of_Capital_Loader.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\DataPrepForms\CS-54_Data_Loader.resx">
+      <DependentUpon>CS-54_Data_Loader.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\DataPrepForms\Initialize_URCS_Year.resx">
+      <DependentUpon>Initialize_URCS_Year.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\DataPrepForms\Loss_Damage_Loader.resx">
+      <DependentUpon>Loss_Damage_Loader.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\DataPrepForms\QCS_Loader.resx">
+      <DependentUpon>QCS_Loader.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\DataPrepForms\R1_Data_Load.resx">
+      <DependentUpon>R1_Data_Load.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\DataPrepForms\Segments_Table_Builder.resx">
+      <DependentUpon>Segments_Table_Builder.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\DataPrepForms\Tare_Weight_Loader.resx">
+      <DependentUpon>Tare_Weight_Loader.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\DataPrepForms\UMF_Load_Legacy.resx">
+      <DependentUpon>UMF_Load_Legacy.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\DataPrepForms\Unmasked_Table_Update.resx">
+      <DependentUpon>Unmasked_Table_Update.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\DataPrepForms\Waybill_Data_Loader.resx">
+      <DependentUpon>Waybill_Data_Loader.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\DataPrepForms\WayRRR_Verification.resx">
+      <DependentUpon>WayRRR_Verification.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\Global Variables and Routines\MsgForm.resx">
+      <DependentUpon>MsgForm.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\Legacy Costing\Legacy_Costing.resx">
+      <DependentUpon>Legacy_Costing.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\Menu_PreProcessing_Checks.resx">
+      <DependentUpon>Menu_PreProcessing_Checks.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\Menu_DataPrep.resx">
+      <DependentUpon>Menu_DataPrep.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\Menu_Main.resx">
+      <DependentUpon>Menu_Main.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\Menu_PostProcessing.resx">
+      <DependentUpon>Menu_PostProcessing.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\Menu_WBGeneratorsAndUtilities.resx">
+      <DependentUpon>Menu_WBGeneratorsAndUtilities.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\Phase2\frmPhase2Main.resx">
+      <DependentUpon>frmPhase2Main.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\Phase3\frmPhase3Main.resx">
+      <DependentUpon>frmPhase3Main.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\PostProcessingForms\frm_AddMakeWholeToXML.resx">
+      <DependentUpon>frm_AddMakeWholeToXML.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\PostProcessingForms\frm_Productivity.resx">
+      <DependentUpon>frm_Productivity.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\PostProcessingForms\frm_XML_Comparison.resx">
+      <DependentUpon>frm_XML_Comparison.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\PostProcessingForms\frm_XML_Data_Loader.resx">
+      <DependentUpon>frm_XML_Data_Loader.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\PreprocessingForms\frm_R-1_Balance.resx">
+      <DependentUpon>frm_R-1_Balance.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\PreprocessingForms\frm_Trans_Comparison.resx">
+      <DependentUpon>frm_Trans_Comparison.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\WBGenerators\Annual_WB_Generator.resx">
+      <DependentUpon>Annual_WB_Generator.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\WBGenerators\Participatory_RR_WB_Generator.resx">
+      <DependentUpon>Participatory_RR_WB_Generator.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\WBGenerators\PUWS_Generator.resx">
+      <DependentUpon>PUWS_Generator.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\WBGenerators\QuarterlyMaskingUtil.resx">
+      <DependentUpon>QuarterlyMaskingUtil.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\WBGenerators\RR_WB_Generator.resx">
+      <DependentUpon>RR_WB_Generator.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\WBGenerators\State_WB_Generator.resx">
+      <DependentUpon>State_WB_Generator.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\WBGenerators\Trim_SQL_Field_Values.resx">
+      <DependentUpon>Trim_SQL_Field_Values.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source Code\WBGenerators\WB_By_STCC_Generator.resx">
+      <DependentUpon>WB_By_STCC_Generator.vb</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="My Project\app.manifest" />
+    <None Include="My Project\Application.myapp">
+      <Generator>MyApplicationCodeGenerator</Generator>
+      <LastGenOutput>Application.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="My Project\Settings.settings">
+      <Generator>PublicSettingsSingleFileGenerator</Generator>
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="packages.config" />
+    <None Include="URCS And Waybills_TemporaryKey.pfx" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4 Client Profile %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\stb_seal_sm.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Exit.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="ADODB">
+      <Guid>{B691E011-1797-432E-907A-4D8C69339129}</Guid>
+      <VersionMajor>6</VersionMajor>
+      <VersionMinor>1</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="Microsoft.Office.Core">
+      <Guid>{2DF8D04C-5BFA-101B-BDE5-00AA0044DE52}</Guid>
+      <VersionMajor>2</VersionMajor>
+      <VersionMinor>8</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="VBIDE">
+      <Guid>{0002E157-0000-0000-C000-000000000046}</Guid>
+      <VersionMajor>5</VersionMajor>
+      <VersionMinor>3</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Images\200px-US-SurfaceTransportationBoard-Seal.svg.png" />
+    <Content Include="Images\adjust-cb10.png" />
+    <Content Include="Images\adjust-cb11.png" />
+    <Content Include="Images\body-wds-1.png" />
+    <Content Include="Images\body-wds-2.png" />
+    <Content Include="Images\change-cb6.png" />
+    <Content Include="Images\change-cb7.png" />
+    <Content Include="Images\current-year.png" />
+    <Content Include="Images\filler-cb4.png" />
+    <Content Include="Images\filter-cb5.png" />
+    <Content Include="Images\filter-non-cb1.png" />
+    <Content Include="Images\force-cb8.png" />
+    <Content Include="Images\legacy-costing-lbl.png" />
+    <Content Include="Images\line.png" />
+    <Content Include="Images\middle.png" />
+    <Content Include="Images\Panel-1a-bg.png" />
+    <Content Include="Images\production-costing-lbl.png" />
+    <Content Include="Images\Psnel-3-bg.png" />
+    <Content Include="Images\reduce-cb12.png" />
+    <Content Include="Images\return.png" />
+    <Content Include="Images\round-cb2.png" />
+    <Content Include="Images\round-cb3.png" />
+    <Content Include="Images\seg-loop1-lbl.png" />
+    <Content Include="Images\seg-loop2-lbl.png" />
+    <Content Include="Images\URCS-wds.png" />
+    <Content Include="Images\use-cb13.png" />
+    <Content Include="Images\use-cb9.png" />
+    <Content Include="train-5-multi-size.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\Visual Studio Tools for Office\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type='text/xsl' href='_UpgradeReport_Files/UpgradeReport.xslt'?><UpgradeLog>
+<Properties><Property Name="Solution" Value="ProgBar">
+</Property><Property Name="Solution File" Value="C:\Users\sandersm\Desktop\ProgBarPlus\ProgBar.sln">
+</Property><Property Name="User Options File" Value="C:\Users\sandersm\Desktop\ProgBarPlus\ProgBar.suo">
+</Property><Property Name="Date" Value="Friday, July 19, 2013">
+</Property><Property Name="Time" Value="13:11 PM">
+</Property></Properties><Event ErrorLevel="0" Project="" Source="ProgBar.sln" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBar.sln">
+</Event><Event ErrorLevel="0" Project="" Source="ProgBar.suo" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBar.suo">
+</Event><Event ErrorLevel="0" Project="ProgBar" Source="ProgBar\ProgBar.vbproj" Description="Project file successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBar\ProgBar.vbproj">
+</Event><Event ErrorLevel="0" Project="ProgBar" Source="ProgBar\ProgBar.vbproj.user" Description="Project user file successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBar\ProgBar.vbproj.user">
+</Event><Event ErrorLevel="0" Project="ProgBar" Source="ProgBar\dlgCorners.Designer.vb" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBar\dlgCorners.Designer.vb">
+</Event><Event ErrorLevel="0" Project="ProgBar" Source="ProgBar\dlgCorners.vb" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBar\dlgCorners.vb">
+</Event><Event ErrorLevel="0" Project="ProgBar" Source="ProgBar\dlgFocalPoints.Designer.vb" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBar\dlgFocalPoints.Designer.vb">
+</Event><Event ErrorLevel="0" Project="ProgBar" Source="ProgBar\dlgFocalPoints.vb" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBar\dlgFocalPoints.vb">
+</Event><Event ErrorLevel="0" Project="ProgBar" Source="ProgBar\DropdownColorBlender.designer.vb" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBar\DropdownColorBlender.designer.vb">
+</Event><Event ErrorLevel="0" Project="ProgBar" Source="ProgBar\DropdownColorBlender.vb" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBar\DropdownColorBlender.vb">
+</Event><Event ErrorLevel="0" Project="ProgBar" Source="ProgBar\My Project\Application.Designer.vb" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBar\My Project\Application.Designer.vb">
+</Event><Event ErrorLevel="0" Project="ProgBar" Source="ProgBar\My Project\AssemblyInfo.vb" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBar\My Project\AssemblyInfo.vb">
+</Event><Event ErrorLevel="0" Project="ProgBar" Source="ProgBar\My Project\Resources.Designer.vb" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBar\My Project\Resources.Designer.vb">
+</Event><Event ErrorLevel="0" Project="ProgBar" Source="ProgBar\My Project\Settings.Designer.vb" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBar\My Project\Settings.Designer.vb">
+</Event><Event ErrorLevel="0" Project="ProgBar" Source="ProgBar\ProgBarPlus.designer.vb" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBar\ProgBarPlus.designer.vb">
+</Event><Event ErrorLevel="0" Project="ProgBar" Source="ProgBar\ProgBarPlus.vb" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBar\ProgBarPlus.vb">
+</Event><Event ErrorLevel="0" Project="ProgBar" Source="ProgBar\My Project\Application.myapp" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBar\My Project\Application.myapp">
+</Event><Event ErrorLevel="0" Project="ProgBar" Source="ProgBar\My Project\Settings.settings" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBar\My Project\Settings.settings">
+</Event><Event ErrorLevel="0" Project="ProgBar" Source="ProgBar\My Project\Resources.resx" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBar\My Project\Resources.resx">
+</Event><Event ErrorLevel="0" Project="ProgBar" Source="ProgBar\ProgBarPlus.resx" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBar\ProgBarPlus.resx">
+</Event><Event ErrorLevel="0" Project="ProgBar" Source="ProgBar\dlgCorners.resx" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBar\dlgCorners.resx">
+</Event><Event ErrorLevel="0" Project="ProgBar" Source="ProgBar\dlgFocalPoints.resx" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBar\dlgFocalPoints.resx">
+</Event><Event ErrorLevel="0" Project="ProgBar" Source="ProgBar\DropdownColorBlender.resx" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBar\DropdownColorBlender.resx">
+</Event><Event ErrorLevel="0" Project="ProgBar" Source="ProgBar\ProgBarPlus.bmp" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBar\ProgBarPlus.bmp">
+</Event><Event ErrorLevel="0" Project="ProgBar" Source="ProgBar\ProgBar.vbproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="ProgBar" Source="ProgBar\ProgBar.vbproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="ProgBarTestForm" Source="ProgBarTestForm\ProgBarTestForm.vbproj" Description="Project file successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBarTestForm\ProgBarTestForm.vbproj">
+</Event><Event ErrorLevel="0" Project="ProgBarTestForm" Source="ProgBarTestForm\ProgBarTestForm.vbproj.user" Description="Project user file successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBarTestForm\ProgBarTestForm.vbproj.user">
+</Event><Event ErrorLevel="0" Project="ProgBarTestForm" Source="ProgBarTestForm\Form1.designer.vb" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBarTestForm\Form1.designer.vb">
+</Event><Event ErrorLevel="0" Project="ProgBarTestForm" Source="ProgBarTestForm\Form1.vb" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBarTestForm\Form1.vb">
+</Event><Event ErrorLevel="0" Project="ProgBarTestForm" Source="ProgBarTestForm\Form2.Designer.vb" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBarTestForm\Form2.Designer.vb">
+</Event><Event ErrorLevel="0" Project="ProgBarTestForm" Source="ProgBarTestForm\Form2.vb" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBarTestForm\Form2.vb">
+</Event><Event ErrorLevel="0" Project="ProgBarTestForm" Source="ProgBarTestForm\My Project\AssemblyInfo.vb" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBarTestForm\My Project\AssemblyInfo.vb">
+</Event><Event ErrorLevel="0" Project="ProgBarTestForm" Source="ProgBarTestForm\My Project\Application.Designer.vb" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBarTestForm\My Project\Application.Designer.vb">
+</Event><Event ErrorLevel="0" Project="ProgBarTestForm" Source="ProgBarTestForm\My Project\Resources.Designer.vb" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBarTestForm\My Project\Resources.Designer.vb">
+</Event><Event ErrorLevel="0" Project="ProgBarTestForm" Source="ProgBarTestForm\My Project\Settings.Designer.vb" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBarTestForm\My Project\Settings.Designer.vb">
+</Event><Event ErrorLevel="0" Project="ProgBarTestForm" Source="ProgBarTestForm\frmSamples.Designer.vb" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBarTestForm\frmSamples.Designer.vb">
+</Event><Event ErrorLevel="0" Project="ProgBarTestForm" Source="ProgBarTestForm\frmSamples.vb" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBarTestForm\frmSamples.vb">
+</Event><Event ErrorLevel="0" Project="ProgBarTestForm" Source="ProgBarTestForm\My Project\Application.myapp" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBarTestForm\My Project\Application.myapp">
+</Event><Event ErrorLevel="0" Project="ProgBarTestForm" Source="ProgBarTestForm\My Project\Settings.settings" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBarTestForm\My Project\Settings.settings">
+</Event><Event ErrorLevel="0" Project="ProgBarTestForm" Source="ProgBarTestForm\Tinkertoy.ico" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBarTestForm\Tinkertoy.ico">
+</Event><Event ErrorLevel="0" Project="ProgBarTestForm" Source="ProgBarTestForm\Form1.resx" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBarTestForm\Form1.resx">
+</Event><Event ErrorLevel="0" Project="ProgBarTestForm" Source="ProgBarTestForm\Form2.resx" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBarTestForm\Form2.resx">
+</Event><Event ErrorLevel="0" Project="ProgBarTestForm" Source="ProgBarTestForm\My Project\Resources.resx" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBarTestForm\My Project\Resources.resx">
+</Event><Event ErrorLevel="0" Project="ProgBarTestForm" Source="ProgBarTestForm\frmSamples.resx" Description="File successfully backed up as C:\Users\sandersm\Desktop\ProgBarPlus\Backup\ProgBarTestForm\frmSamples.resx">
+</Event><Event ErrorLevel="0" Project="ProgBarTestForm" Source="ProgBarTestForm\ProgBarTestForm.vbproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="ProgBarTestForm" Source="ProgBarTestForm\ProgBarTestForm.vbproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="" Source="ProgBar.sln" Description="Solution converted successfully">
+</Event><Event ErrorLevel="3" Project="" Source="ProgBar.sln" Description="Converted">
+</Event><Event ErrorLevel="0" Project="ProgBar" Source="ProgBar\ProgBar.vbproj" Description="Scan complete: Upgrade not required for project files.">
+</Event><Event ErrorLevel="0" Project="ProgBarTestForm" Source="ProgBarTestForm\ProgBarTestForm.vbproj" Description="Scan complete: Upgrade not required for project files.">
+</Event></UpgradeLog>

@@ -1,0 +1,99 @@
+# Build results
+bin/
+obj/
+out/
+[Bb]uild/
+[Ll]og/
+
+# Visual Studio files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.vssscc
+*.vspscc
+*.vshost.*
+*.vsidx
+*.psess
+*.vsp
+*.vspx
+*.ncb
+*.opendb
+*.VC.db
+*.VC.VC.opendb
+
+# Visual Studio Code
+.vscode/
+
+# Packages
+packages/
+*.nupkg
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# NuGet
+*.nuget.props
+*.nuget.targets
+
+# Other tool settings
+*.DotSettings
+*.DotSettings.user
+
+# Configuration and secrets
+appsettings.*.json
+appsettings.Development.json
+secrets.json
+*.pfx
+*.key
+*.snk
+
+# Logs
+*.log
+logs/
+*.tlog
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swn
+*.swo
+*.sln.docstates
+[Tt]humbs.db
+[Dd]esktop.ini
+~$*
+
+# Test results
+[Tt]est[Rr]esult*/
+*.VisualState.xml
+TestResult.xml
+coverage*.json
+coverage*.xml
+coverage*.info
+*.coverage
+*.coveragexml
+
+# Publish output
+publish/
+dist/
+node_modules/
+wwwroot/lib/
+
+# IDE specific
+.vs/
+.idea/
+
+# OS generated
+.DS_Store
+ehthumbs.db
+Icon?
+Thumbs.db
+
+# Specific project artifacts (from your folder list)
+Source Code_*.zip
+*.vbproj.user
+*.TemporaryKey
+*.vbproj.user

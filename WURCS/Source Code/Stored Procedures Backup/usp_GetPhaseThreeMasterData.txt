@@ -1,0 +1,65 @@
+USE [URCS]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_GetPhaseThreeMasterData]    Script Date: 12/03/2014 12:17:48 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		David Aholt, Philotechnia, L.L.C
+-- Create date: 2011-12-19 10:00:39.193
+-- Description:	Data retrival for URCS Program
+-- =============================================
+ALTER PROCEDURE [dbo].[usp_GetPhaseThreeMasterData]
+AS
+SET NOCOUNT ON;
+
+SELECT mask.Serial_no,
+		seg.Seg_no,
+		seg.Total_Segs,
+		mask.total_dist,
+		mask.STB_Car_Typ,
+		mask.TOFC_Serv_Code,
+		mask.U_Cars,
+		mask.car_own,
+		mask.U_Car_Init,
+		mask.u_tc_units,
+		mask.Exp_Factor_Th,
+		mask.Tons,
+		mask.bill_Wght_tons,
+		mask.JF,
+		mask.STCC,
+		mask.Transborder_Flg,
+		mask.ORR_Dist,
+		mask.JRR1_Dist,
+		mask.JRR2_Dist,
+		mask.JRR3_Dist,
+		mask.JRR4_Dist,
+		mask.JRR5_Dist,
+		mask.JRR6_Dist,
+		mask.TRR_Dist,
+		mask.ORR,
+		mask.JRR1,
+		mask.JRR2,
+		mask.JRR3,
+		mask.JRR4,
+		mask.JRR5,
+		mask.JRR6,
+		mask.TRR,
+		seg.ship_type,
+		seg.RR_Dist,
+		seg.RR_Num,
+		seg.RR_Rev,
+		seg.RR_Cntry
+FROM U_CURRENT_MASKED mask(NOLOCK)
+JOIN U_CURRENT_SEGMENTS seg (NOLOCK) ON mask.serial_no = seg.serial_no
+--WHERE mask.Serial_No in (select Serial_No from Test89 WHERE New_Flg is null) --89
+--WHERE mask.Serial_No in (select Serial_No from Test89) -- 400
+--WHERE mask.Serial_No in (select Serial_No from Test122) -- 122
+--WHERE mask.Serial_No = 516606
+ORDER BY mask.Serial_No, seg.Seg_no
+
+
+
+
+

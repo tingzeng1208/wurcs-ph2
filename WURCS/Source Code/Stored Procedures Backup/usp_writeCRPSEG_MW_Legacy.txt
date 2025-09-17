@@ -1,0 +1,52 @@
+USE [URCS]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_writeCRPSEG_MW_Legacy]    Script Date: 12/03/2014 12:23:32 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		David Aholt, Philotechnia, L.L.C
+-- Create date: 2012-1-09 12:00:20.180
+-- Description:	Data write for URCS Program
+-- =============================================
+ALTER PROCEDURE [dbo].[usp_writeCRPSEG_MW_Legacy](@SerialNum int,
+		@SegmentNumber int,
+		@L573 float,
+		@L574 float,
+		@L575 float,
+		@L576 float,
+		@L577 float,
+		@L578 float,
+		@L579 float,
+		@L580 float,
+		@L581 float,
+		@L582 float,
+		@L583 float,
+		@L584 float,
+		@L585 float,
+		@L586 float,
+		@L587 float,
+		@L700 float)
+AS
+SET NOCOUNT ON;
+
+UPDATE U_CRPSEG_LEGACY SET L573 = @L573, 
+		L574 = @L574, 
+		L575 = @L575, 
+		L576 = @L576, 
+		L577 = @L577, 
+		L578 = @L578,
+		L579 = @L579,  
+		L580 = @L580, 
+		L581 = @L581, 
+		L582 = @L582, 
+		L583 = @L583, 
+		L584 = @L584, 
+		L585 = @L585, 
+		L586 = @L586,
+		L587 = @L587,
+		L700 = @L700
+WHERE SerialNum = @SerialNum and SegmentNumber = @SegmentNumber
+
+
