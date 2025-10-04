@@ -1,0 +1,76 @@
+GetAValue0_RR: Select at.[Year],at.[aCode_id],at.[Value],ac.[aLine], ac.[Rpt_sheet] FROM [U_AValues] at (NOLOCK) JOIN [URCS_Controls].[dbo].[R_ACODES] ac (NOLOCK) on at.aCode_id = ac.aCode_id WHERE RR_Id = 0 ORDER BY acode_id
+GetAValue    : Select at.[Year],at.[aCode_id],at.[Value],ac.[aLine], ac.[Rpt_sheet], ac.[aColumn] FROM [U_AValues] at (NOLOCK) JOIN [URCS_CONTROLS].[dbo].[R_ACODES] ac (NOLOCK) On at.aCode_id = ac.aCode_id WHERE RR_Id = 2 ORDER BY acode_id
+GetAValueRegion_RR: SELECT at.[Year],at.[aCode_id],at.[Value],ac.[aLine], ac.[Rpt_sheet], ac.[Code] FROM [U_AValues] at (NOLOCK) JOIN [URCS_CONTROLS].[dbo].[R_ACODES] ac (NOLOCK) on at.aCode_id = ac.aCode_id WHERE RR_Id = (SELECT TOP 1 RR_ID FROM [URCS_Controls].[dbo].R_CLASS1_RAIL_LIST WHERE SHORT_NAME = (SELECT TOP 1 Description FROM [URCS_Controls].[dbo].R_Region                      reg INNER JOIN [URCS_Controls].[dbo].R_CLASS1_RAIL_LIST rr ON reg.id = rr.REGION_ID WHERE RR_ID = 1)) ORDER BY acode_id
+GetLineSourceText:SELECT * FROM urcs_control.R_LINE_SOURCE_TEXT             ORDER BY Rpt_sheet,Line
+
+Dim iLine As Integer
+For Each drSource As DataRow In dtLineSourceText.Select(sSelectStringRows)
+
+    iLine = Integer.Parse(drSource("Line")) - iLineNumberOffset
+
+    'Sources first
+    oRange(iLine, 4) = "'" & scrubYear(drSource("C1").ToString())
+    oRange(iLine, 6) = "'" & scrubYear(drSource("C2").ToString())
+    oRange(iLine, 8) = "'" & scrubYear(drSource("C3").ToString())
+    oRange(iLine, 10) = "'" & scrubYear(drSource("C4").ToString())
+    oRange(iLine, 12) = "'" & scrubYear(drSource("C5").ToString())
+    oRange(iLine, 14) = "'" & scrubYear(drSource("C6").ToString())
+    oRange(iLine, 16) = "'" & scrubYear(drSource("C7").ToString())
+    oRange(iLine, 18) = "'" & scrubYear(drSource("C8").ToString())
+    oRange(iLine, 20) = "'" & scrubYear(drSource("C9").ToString())
+
+    'C6 - C9 Values
+    oRange(iLine, 15) = IIf(drSource("Line") = 158, "0", drSource("C6").ToString())
+    oTempRange = oRange(iLine, 15)
+    oTempRange.Name = "A1L" & drSource("Line").ToString() & "C6"
+    oTempRange.NumberFormat = "#,##0"
+
+    oRange(iLine, 17) = IIf(drSource("Line") = 158, "0", drSource("C7").ToString())
+    oTempRange = oRange(iLine, 17)
+    oTempRange.Name = "A1L" & drSource("Line").ToString() & "C7"
+    oTempRange.NumberFormat = "#,##0"
+
+    oRange(iLine, 19) = IIf(drSource("Line") = 158, "0", drSource("C8").ToString())
+    oTempRange = oRange(iLine, 19)
+    oTempRange.Name = "A1L" & drSource("Line").ToString() & "C8"
+    oTempRange.NumberFormat = "#,##0"
+
+    oRange(iLine, 21) = IIf(drSource("Line") = 158, "0", drSource("C9").ToString())
+    oTempRange = oRange(iLine, 21)
+    oTempRange.Name = "A1L" & drSource("Line").ToString() & "C9"
+    oTempRange.NumberFormat = "#,##0"
+
+    'Random Values that are not from the Data Dictionary
+    If Integer.Parse(drSource("Line")) = 111 Or Integer.Parse(drSource("Line")) = 122 Or Integer.Parse(drSource("Line")) = 131 Or
+        Integer.Parse(drSource("Line")) = 133 Or Integer.Parse(drSource("Line")) = 137 Or Integer.Parse(drSource("Line")) = 144 Or
+        Integer.Parse(drSource("Line")) = 145 Or Integer.Parse(drSource("Line")) = 146 Or Integer.Parse(drSource("Line")) = 151 Or
+        Integer.Parse(drSource("Line")) = 154 Or Integer.Parse(drSource("Line")) = 155 Then
+
+        oRange(iLine, 5) = drSource("C1").ToString()
+        oTempRange = oRange(iLine, 5)
+        oTempRange.Name = "A1L" & drSource("Line").ToString() & "C1"
+        oTempRange.NumberFormat = "#,##0"
+
+        oRange(iLine, 7) = drSource("C2").ToString()
+        oTempRange = oRange(iLine, 7)
+        oTempRange.Name = "A1L" & drSource("Line").ToString() & "C2"
+        oTempRange.NumberFormat = "#,##0"
+
+        oRange(iLine, 9) = drSource("C3").ToString()
+        oTempRange = oRange(iLine, 9)
+        oTempRange.Name = "A1L" & drSource("Line").ToString() & "C3"
+        oTempRange.NumberFormat = "#,##0"
+
+        oRange(iLine, 11) = drSource("C4").ToString()
+        oTempRange = oRange(iLine, 11)
+        oTempRange.Name = "A1L" & drSource("Line").ToString() & "C4"
+        oTempRange.NumberFormat = "#,##0"
+
+        oRange(iLine, 13) = drSource("C5").ToString()
+        oTempRange = oRange(iLine, 13)
+        oTempRange.Name = "A1L" & drSource("Line").ToString() & "C5"
+        oTempRange.NumberFormat = "#,##0"
+
+    End If
+
+Next

@@ -97,3 +97,17 @@ Source Code_*.zip
 *.vbproj.user
 *.TemporaryKey
 *.vbproj.user
+
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+reports/
+**/reports/
+.vscode/

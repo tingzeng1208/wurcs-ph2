@@ -1,0 +1,20 @@
+[project]
+name = "phase2-development"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+	"pandas",
+	"uv",
+	"setuptools==78.1.1",
+	"wheel==0.45.1",
+	"numpy",
+	"python-dotenv",
+	"pyodbc",
+	"pytest",
+	"psycopg2-binary",
+	"redshift_connector",
+	"boto3",
+	"openpyxl"
+	]
