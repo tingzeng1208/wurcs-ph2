@@ -16,5 +16,7 @@ dependencies = [
 	"psycopg2-binary",
 	"redshift_connector",
 	"boto3",
-	"openpyxl"
+	"openpyxl",
+	"pytest",
+	"git-filter-repo"
 	]

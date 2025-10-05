@@ -1,0 +1,414 @@
+Look at the code repository. In the folder WURCS, it is the codes in VB.net using SQL server that for old system, 
+in folder /Source Code/Phase2/, the there is code to prepare the data, there are code to generate the workbook and spreadsheets including INDEX, A1P1, A1P2, etc. 
+
+Look at folder Phase2-dev/, there are the new code written in python using AWS Redshift as data repository, the prepare (data) code is done by Prepare_phase2_input_data.py, and the first sheet "INDEX" (function: build_index_worksheet()) and the second sheet "A1P1" (A1P1_worksheet) are finished in code "Create_reports.py". I want you to create another file which contains all set up from Create_reports.py, give the file name "Create_reports_new.py" and include functions to create each work sheet as in the VB.net. These VB.net functions need to be created in the new file in python are as follows:
+
+ A1P2A(3)
+
+ 'BUILD A1P2B
+ A1P2B(4)
+
+ 'BUILD A1P2C
+ A1P2C(5)
+
+ 'BUILD A1P3A
+ A1P3A(6)
+
+ 'BUILD A1P3B
+ A1P3B(7)
+
+ 'BUILD A1P4
+ A1P4(8)
+
+ 'BUILD A1P5A
+ A1P5A(9)
+
+ 'BUILD A1P5B
+ A1P5B(10)
+
+ 'BUILD A1P6
+ A1P6(11)
+
+ 'BUILD A1P7
+ A1P7(12)
+
+ 'BUILD A1P8
+ A1P8(13)
+
+ 'BUILD A1P9
+ A1P9(14)
+
+ 'BUILD A2P1
+ A2P1(15)
+
+ 'BUILD A2P2
+ A2P2(16)
+
+ 'BUILD A2P3
+ A2P3(17)
+
+ 'BUILD A2P4
+ A2P4(18)
+
+ 'BUILD A3P1
+ A3P1(19)
+
+ 'BUILD A3P2
+ A3P2(20)
+
+ 'BUILD A3P3
+ A3P3(21)
+
+ 'BUILD A3P4
+ A3P4(22)
+
+ 'BUILD A3P5
+ A3P5(23)
+
+ 'BUILD A3P6
+ A3P6(24)
+
+ 'BUILD A3P7
+ A3P7(25)
+
+ 'BUILD A3P8
+ A3P8(26)
+
+ 'BUILD A4P1
+ A4P1(27)
+
+ 'BUILD A4P2
+ A4P2(28)
+
+ 'BUILD A4P3
+ A4P3(29)
+
+ 'BUILD B1P1
+ B1P1(30)
+
+ 'BUILD B2P1
+ B2P1(31)
+
+ 'BUILD B2P2
+ B2P2(32)
+
+ 'BUILD B2P3
+ B2P3(33)
+
+ 'BUILD B2P4
+ B2P4(34)
+
+ 'BUILD B2P5
+ B2P5(35)
+
+ 'BUILD B2P6
+ B2P6(36)
+
+ 'BUILD B2P8
+ B2P8(37)
+
+ 'BUILD B2P9
+ B2P9(38)
+
+ 'BUILD B3P1
+ B3P1(39)
+
+ 'BUILD B3P1A
+ B3P1A(40)
+
+ 'BUILD B3P1B
+ B3P1B(41)
+
+ 'BUILD B3P1C
+ B3P1C(42)
+
+ 'BUILD B3P1D
+ B3P1D(43)
+
+ 'BUILD B3P2
+ B3P2(44)
+
+ 'BUILD B3P3
+ B3P3(45)
+
+ 'BUILD B3P4
+ B3P4(46)
+
+ 'BUILD B3P5
+ B3P5(47)
+
+ 'BUILD B3P6
+ B3P6(48)
+
+ 'BUILD B3P7
+ B3P7(49)
+
+ 'BUILD B3P8
+ B3P8(50)
+
+ 'BUILD B5P3
+ B5P3(51)
+
+ 'BUILD B5P4
+ B5P4(52)
+
+ 'BUILD B5P5
+ B5P5(53)
+
+ 'BUILD B5P6
+ B5P6(54)
+
+ 'BUILD B5P7
+ B5P7(55)
+
+ 'BUILD B6P1
+ B6P1(56)
+
+ 'BUILD B6P2A
+ B6P2A(57)
+
+ 'BUILD B6P2B
+ B6P2B(58)
+
+ 'BUILD B6P2C
+ B6P2C(59)
+
+ 'BUILD B6P2D
+ B6P2D(60)
+
+ 'BUILD B6P2E
+ B6P2E(61)
+
+ 'BUILD B6P3
+ B6P3(62)
+
+ 'BUILD B7P1
+ B7P1(63)
+
+ 'BUILD B7P2
+ B7P2(64)
+
+ 'BUILD B7P3
+ B7P3(65)
+
+ 'BUILD B7P4
+ B7P4(66)
+
+ 'BUILD B7P5
+ B7P5(67)
+
+ 'BUILD B7P6
+ B7P6(68)
+
+ 'BUILD B7P7
+ B7P7(69)
+
+ 'BUILD B7P8
+ B7P8(70)
+
+ 'BUILD B8P1
+ B8P1(71)
+
+ 'BUILD B9P1
+ B9P1(72)
+
+ 'BUILD B9P2
+ B9P2(73)
+
+ 'BUILD B9P3
+ B9P3(74)
+
+ 'BUILD B9P4
+ B9P4(75)
+
+ 'BUILD B9P5
+ B9P5(76)
+
+ 'BUILD C
+ C(77)
+
+ 'BUILD C SUMMARY
+ CSummary(92)
+
+ 'BUILD D1P1
+ D1P1(93)
+
+ 'BUILD D1P2
+ D1P2(94)
+
+ 'BUILD(D2P1)
+ D2P1(95)
+
+ 'BUILD D2P2
+ D2P2(96)
+
+ 'BUILD D3P1
+ D3P1(97)
+
+ 'BUILD(D3P2)
+ D3P2(98)
+
+ 'BUILD D4P1
+ D4P1(99)
+
+ 'BUILD D4P2
+ D4P2(100)
+
+ 'BUILD D5P1
+ D5P1(101)
+
+ 'BUILD D6P1
+ D6P1(102)
+
+ 'BUILD D6P1A
+ D6P1A_P17(103, "1A")
+
+ 'BUILD D6P2
+ D6P1A_P17(104, "2")
+
+ 'BUILD D6P3
+ D6P1A_P17(105, "3")
+
+ 'BUILD D6P4
+ D6P1A_P17(106, "4")
+
+ 'BUILD D6P5
+ D6P1A_P17(107, "5")
+
+ 'BUILD D6P6
+ D6P1A_P17(108, "6")
+
+ 'BUILD D6P7
+ D6P1A_P17(109, "7")
+
+ 'BUILD D6P8
+ D6P1A_P17(110, "8")
+
+ 'BUILD D6P9
+ D6P1A_P17(111, "9")
+
+ 'BUILD D6P10
+ D6P1A_P17(112, "10")
+
+ 'BUILD D6P11
+ D6P1A_P17(113, "11")
+
+ 'BUILD D6P12
+ D6P1A_P17(114, "12")
+
+ 'BUILD D6P13
+ D6P1A_P17(115, "13")
+
+ 'BUILD D6P14
+ D6P1A_P17(116, "14")
+
+ 'BUILD D6P15
+ D6P1A_P17(117, "15")
+
+ 'BUILD D6P16
+ D6P1A_P17(118, "16")
+
+ 'BUILD D6P17
+ D6P1A_P17(119, "17")
+
+ 'BUILD D6P18
+ D6P18(120)
+
+ 'BUILD D6P19
+ D6P19(121)
+
+ 'BUILD D7P1
+ D7P1(122)
+
+ 'BUILD D7P2
+ D7P2(123)
+
+ 'BUILD D7P3
+ D7P3(124)
+
+ 'BUILD D7P4
+ D7P4(125)
+
+ 'BUILD D7P5
+ D7P5(126)
+
+ 'BUILD D7P6
+ D7P6(127)
+
+ 'BUILD D7P7A
+ D7P7A(128)
+
+ 'BUILD D7P7B
+ D7P7B(129)
+
+ 'BUILD D7P7C
+ D7P7C(130)
+
+ 'BUILD D7P8
+ D7P8(131)
+
+ 'BUILD D7P9
+ D7P9(132)
+
+ 'BUILD D7P10
+ D7P10(133)
+
+ 'BUILD D7P11
+ D7P11(134)
+
+ 'BUILD D7P12
+ D7P12(135)
+
+ 'BUILD D7P13
+ D7P13(136)
+
+ 'BUILD D8P1
+ D8P1(137)
+
+ 'BUILD D8P2
+ D8P2(138)
+
+ 'BUILD D8P4
+ D8P4(139)
+
+ 'BUILD D8P6
+ D8P6(140)
+
+ 'BUILD D8P7A
+ D8P7A(141)
+
+ 'BUILD D8P7B
+ D8P7B(142)
+
+ 'BUILD E1P1
+ E1P1(143)
+
+ 'BUILD E1P2
+ E1P2(144)
+
+ 'BUILD E1P3
+ E1P3(145)
+
+ 'BUILD E2P1
+ E2P1(146)
+
+ 'BUILD E2P2
+ E2P2(147)
+
+ 'BUILD E Summary
+ ESummary(148)
+
+Please complete to the best of your knowledge and skills, I am patient and can wait, quality is the most important, please include tests (by test framework like pytest) and auto run test cases. Please check the code and make sure that it runs with the correct spreadsheet generated.
+
+The .env file that is missing from repo is as follows:
+
+REDSHIFT_HOST=wurcs-test-pii-wg.766358818586.us-east-1.redshift-serverless.amazonaws.com
+REDSHIFT_PORT=5439
+REDSHIFT_USER=admin
+REDSHIFT_PASSWORD=NLxHR02_{S<PbroN0mujrNn$}pmOw2{b
+REDSHIFT_DATABASE=dev
+LOCAL_CSV_PATH=C:\Users\Ting.Zeng.ctr\Documents\WURCS-2025-project\development\Phase2-dev\csvs
+S3_BUCKET=stb-wurcs-phase-2-bucket
+IAM_ROLE_ARN=arn:aws:iam::766358818586:role/lambda-access-to-s3-redshift
+
+you may use this code to run the test, and don't keep this secrets anywhere in memory except in this description.

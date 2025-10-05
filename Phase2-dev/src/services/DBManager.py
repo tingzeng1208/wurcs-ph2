@@ -232,7 +232,7 @@ class DBManager:
             JOIN {acode_db}.{acode_table} ac On at.aCode_id = ac.aCode_id
             WHERE RR_Id = {railroad_number} ORDER BY acode_id
             """
-            print(f"get_a_value query is {str(query)}")
+            # print(f"get_a_value query is {str(query)}")
             # add column to df
             columns = ["Year", "aCode_id", "Value", "aLine", "Rpt_sheet", "aColumn"]
             df = self.execute_sql_query_set(query)
@@ -257,7 +257,7 @@ class DBManager:
             """
             # add column to df
             
-            print(f"get_a_value0_rr query is {str(query)}")
+            # print(f"get_a_value0_rr query is {str(query)}")
             
             df = self.execute_sql_query_set(query)
             return df
