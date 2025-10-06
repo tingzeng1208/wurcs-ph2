@@ -272,7 +272,7 @@ if __name__ == "__main__":
     if os.path.exists(comparison_result_path):
         os.remove(comparison_result_path)
 
-    sheetnames = ["INDEX", "A1P1", "A1P2A", "A1P2B"]
+    sheetnames = ["INDEX", "A1P1", "A1P2A", "A1P2B", "A1P2C", "A1P3A"]
 
     for sheetname in sheetnames:
         print(f"\nComparing worksheet: {sheetname}")
