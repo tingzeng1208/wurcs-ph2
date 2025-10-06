@@ -1,11 +1,3 @@
-rricc,effective_year,expiration_year,short_name,name,region_id,rr_id,regionrricc,nationrricc
-114900,1900,9999,CN,Canadian National,4,1,900004,900099
-117000,1900,9999,NS,Norfolk Southern,4,2,900004,900099
-125600,1900,9999,CSXT,CSX Transportation Company,4,3,900004,900099
-130500,1900,9999,BNSF,Burlington Northern Santa Fe Railroad Company,7,4,900007,900099
-134500,1900,9999,KCS,Kansas City Southern Railway Company,7,5,900007,900099
-137700,1900,9999,CP,Canadian Pacific,7,6,900007,900099
-139300,1900,9999,UP,Union Pacific Railroad,7,7,900007,900099
-900004,1900,9999,EAST,Eastern Railroads,4,8,900004,900099
-900007,1900,9999,WEST,Western Railroads,7,9,900007,900099
-900099,1900,9999,ALL,National Data Record,0,0,900099,900099
+rr_id,rricc,regionrricc,nationrricc
+1,111111,910000,990000
+2,222222,910000,990000
