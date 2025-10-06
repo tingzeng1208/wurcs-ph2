@@ -7,6 +7,7 @@ from openpyxl.styles import Font, Alignment, Border, Side
 from openpyxl.workbook.defined_name import DefinedName
 from datetime import datetime
 from dotenv import load_dotenv
+import win32com.client
 
 load_dotenv()
 
@@ -53,7 +54,9 @@ class CreateReports:
         self.dtECodes = pd.DataFrame(None)
         self.rr_icc = None
         self.s_output_folder = os.path.join(parent_dir, "..", "reports")
-    
+        self.fontname = "Consolas"
+        self.fontsize = 10
+
     def initialize_report_for_a_railroad(self, rr_no):
         self.dtAValueRegion_RR = self.o_db.get_a_value_region_rr(rr_no, self.current_year)
         print("Loaded dtAValueRegion_RR. number of rows:", len(self.dtAValueRegion_RR))
@@ -204,18 +207,20 @@ class CreateReports:
             self.initialize_report_for_a_railroad(row.rr_id)
             self.create_a_report(short_name)
 
-    def set_cell_with_format_and_name(self, ws, wb, row, col, value, number_format, alignment, named_range):
-        # Convert value to int if possible for number formatting
-        try:
-            value = int(value)
-        except (ValueError, TypeError):
-            pass
-        cell = ws.cell(row=row, column=col, value=value)
-        cell.number_format = number_format
-        cell.alignment = alignment
-        wb.defined_names[named_range] = DefinedName(name=named_range, attr_text=f"'{ws.title}'!${cell.column_letter}${cell.row}")
-        return cell
-
+    def format_all_cells(self, ws, fontname=None, fontsize=None):
+        """
+        Format all cells in the worksheet with the given font name and size.
+        If fontname or fontsize is None, use self.fontname and self.fontsize.
+        """
+        if fontname is None:
+            fontname = getattr(self, "fontname", "Consolas")
+        if fontsize is None:
+            fontsize = getattr(self, "fontsize", 10)
+        font = Font(name=fontname, size=fontsize)
+        for row in ws.iter_rows():
+            if row and row[0].row > 5:
+                for cell in row:
+                    cell.font = font
 
     def create_a_report(self, railroad_shortname):
 
@@ -231,10 +236,13 @@ class CreateReports:
         self.A1P2B_worksheet(wb)
         self.A1P2C_worksheet(wb)
         self.A1P3A_worksheet(wb)
-        # self.A1P2C_worksheet(wb) # Placeholder
+        self.A1P3B_worksheet(wb)
+        self.A1P4_worksheet(wb)
+        self.A1P5A_worksheet(wb)
 
         self.remove_default_sheet(wb)
         wb.save(full_path)
+        self.recalculate_excel_formulas(full_path)
         print(f"Workbook {workbookname} saved at: {full_path}")
 
 
@@ -333,10 +341,15 @@ class CreateReports:
 
         # Leave two rows, then write footnotes
         iROW_COUNT += 2
-        for _, drRow in dtFootnotes[dtFootnotes["worktable"] == sSheetTitle[:2]][dtFootnotes["part"] == sSheetTitle[sSheetTitle.index('P')+1:sSheetTitle.index('P')+3]].iterrows():
+        for _, drRow in dtFootnotes[
+            (dtFootnotes["worktable"] == sSheetTitle[:2]) &
+            (dtFootnotes["part"] == sSheetTitle[sSheetTitle.index('P')+1:sSheetTitle.index('P')+3])
+].iterrows():
             ws.cell(row=iROW_COUNT, column=2, value=to_str(drRow["no"]))
             ws.cell(row=iROW_COUNT, column=3, value=to_str(drRow["text"]))
             iROW_COUNT += 1
+            
+    
             
     def write_titles_and_column_headers(self, ws, dtTitles, sSelectWorktable, sTitle_RR_YEAR, sTitle_WORKTABLE, iColumnCount, sSheetTitle):
         # Set font for all cells
@@ -566,6 +579,7 @@ class CreateReports:
                         wb.defined_names[named_range_name] = DefinedName(name=named_range_name, attr_text=f"'{sSheetTitle}'!${cell.column_letter}${cell.row}")
                         
 
+            self.format_all_cells(ws)
             print(f"{sSheetTitle} completed")
 
         except Exception as ex:
@@ -673,6 +687,7 @@ class CreateReports:
                     named_range_name = f"A1L{drSource['line']}C{c_num}"
                     wb.defined_names[named_range_name] = DefinedName(name=named_range_name, attr_text=f"'{sSheetTitle}'!${cell.column_letter}${cell.row}")
 
+            self.format_all_cells(ws)
             print(f"{sSheetTitle} completed")
 
         except Exception as ex:
@@ -788,6 +803,7 @@ class CreateReports:
                         named_range_name = f"A1L{drSource['line']}C{c_num}"
                         wb.defined_names[named_range_name] = DefinedName(name=named_range_name, attr_text=f"'{sSheetTitle}'!${cell.column_letter}${cell.row}")
 
+            self.format_all_cells(ws)
             print(f"{sSheetTitle} completed")
 
         except Exception as ex:
@@ -850,7 +866,8 @@ class CreateReports:
                     # Create named range
                     named_range_name = f"{sNamedRangePrefix}{drSource['line']}{c_name.upper()}"
                     wb.defined_names[named_range_name] = DefinedName(name=named_range_name, attr_text=f"'{sSheetTitle}'!${cell.column_letter}${cell.row}")
-
+            
+            self.format_all_cells(ws)
             print(f"{sSheetTitle} completed")
 
         except Exception as ex:
@@ -941,13 +958,275 @@ class CreateReports:
                         cell.alignment = Alignment(horizontal="right")
                         named_range_name = f"A1L{drSource['line']}C{c_num_map[col]}"
                         wb.defined_names[named_range_name] = DefinedName(name=named_range_name, attr_text=f"'{sSheetTitle}'!${cell.column_letter}${cell.row}")
-
+            
+            self.format_all_cells(ws)
             print(f"{sSheetTitle} completed")
 
         except Exception as ex:
             print(f"Error in {sSheetTitle}: {ex}")
             import traceback
             print(traceback.format_exc())
+
+    def A1P3B_worksheet(self, wb):
+        try:
+            sTitle_WORKTABLE = "WORKTABLE A1 PART 3B"
+            iColumnCount = 41
+            iWorkTableColumnCount = 19
+            sSheetTitle = "A1P3B"
+            iLineNumberOffset = 333
+            sNamedRangePrefix = "A1L"
+
+            dtaValue = self.dtAValue
+            dtLineSourceText = self.dtLineSourceText
+            iCurrentYear = int(self.current_year)
+
+            print(f"Processing {sSheetTitle}")
+
+            # Select worktable and string rows
+            try:
+                part_str = sSheetTitle[sSheetTitle.index('P')+1:sSheetTitle.index('P')+3]
+            except ValueError:
+                part_str = sSheetTitle[sSheetTitle.index('P')+1:]
+            sSelectWorktable = f"Worktable = '{sSheetTitle[:2]}' And Part = '{part_str}'"
+            sSelectStringRows = f"Rpt_sheet = '{sSheetTitle}'"
+
+            ws = wb.create_sheet(title=sSheetTitle)
+
+            # Write titles and column headers
+            self.write_titles_and_column_headers(ws, self.dtTitles, sSelectWorktable, self.sTitle_RR_YEAR, sTitle_WORKTABLE, iColumnCount, sSheetTitle)
+            self.WriteFirst3ColumnsAndPageLayout(ws, self.dtLineSourceText, self.dtFootnotes, sSheetTitle, sSelectStringRows, sSelectWorktable)
+
+            ws.freeze_panes = ws['D8']
+
+            # Write hard values from dtaValue
+            for _, draValues in dtaValue[dtaValue["rpt_sheet"] == sSheetTitle].iterrows():
+                iProcessYear = int(draValues["year"])
+                iROW_COUNT = int(draValues["aline"]) - iLineNumberOffset
+                aCode_id = int(draValues.get("acode_id") or draValues.get("aCode_id", 0))
+
+                if aCode_id % 2 == 0: # Even
+                    col_map = { iCurrentYear: 5, iCurrentYear - 1: 11, iCurrentYear - 2: 17, iCurrentYear - 3: 23, iCurrentYear - 4: 29 }
+                    c_map = { iCurrentYear: 1, iCurrentYear - 1: 4, iCurrentYear - 2: 7, iCurrentYear - 3: 10, iCurrentYear - 4: 13 }
+                else: # Odd
+                    col_map = { iCurrentYear: 7, iCurrentYear - 1: 13, iCurrentYear - 2: 19, iCurrentYear - 3: 25, iCurrentYear - 4: 31 }
+                    c_map = { iCurrentYear: 2, iCurrentYear - 1: 5, iCurrentYear - 2: 8, iCurrentYear - 3: 11, iCurrentYear - 4: 14 }
+
+                if iProcessYear in col_map:
+                    col, c_num = col_map[iProcessYear], c_map[iProcessYear]
+                    cell = ws.cell(row=iROW_COUNT, column=col, value=draValues["value"])
+                    cell.alignment = Alignment(horizontal="right")
+                    cell.number_format = "#,##0"
+                    sNamedRange = f"A1L{draValues['aline']}C{c_num}"
+                    wb.defined_names[sNamedRange] = DefinedName(name=sNamedRange, attr_text=f"'{sSheetTitle}'!${cell.column_letter}${cell.row}")
+
+            # Write sources and derived values
+            for _, drSource in dtLineSourceText[dtLineSourceText["rpt_sheet"] == sSheetTitle].iterrows():
+                iLine = int(drSource["line"]) - iLineNumberOffset
+
+                # Write source columns (C1 to C19)
+                for n in range(1, iWorkTableColumnCount + 1):
+                    col = 2 * n + 2
+                    c_name = f"c{n}"
+                    source_text = self.scrub_year(str(drSource.get(c_name, "")), iCurrentYear)
+                    ws.cell(row=iLine, column=col, value=f"'{source_text}" if source_text.startswith(('=', '+')) else source_text)
+
+                # Write derived values
+                derived_cols = [ (9, 3), (15, 6), (21, 9), (27, 12), (33, 15), (35, 16), (37, 17), (39, 18), (41, 19) ]
+                for col, c_num in derived_cols:
+                    c_name = f"c{c_num}"
+                    value = drSource.get(c_name, "")
+                    cell = ws.cell(row=iLine, column=col, value=value)
+                    cell.number_format = "#,##0"
+                    cell.alignment = Alignment(horizontal="right")
+                    named_range_name = f"A1L{drSource['line']}C{c_num}"
+                    wb.defined_names[named_range_name] = DefinedName(name=named_range_name, attr_text=f"'{sSheetTitle}'!${cell.column_letter}${cell.row}")
+
+                # Random Values for specific lines
+                if int(drSource["line"]) in {344, 348, 352, 363, 364}:
+                    random_value_cols = { 5: "c1", 7: "c2", 11: "c4", 13: "c5", 17: "c7", 19: "c8", 23: "c10", 25: "c11", 29: "c13", 31: "c14" }
+                    c_num_map = { 5: 1, 7: 2, 11: 4, 13: 5, 17: 7, 19: 8, 23: 10, 25: 11, 29: 13, 31: 14 }
+                    for col, c_name in random_value_cols.items():
+                        value = drSource.get(c_name, "")
+                        cell = ws.cell(row=iLine, column=col, value=value)
+                        cell.number_format = "#,##0"
+                        cell.alignment = Alignment(horizontal="right")
+                        named_range_name = f"A1L{drSource['line']}C{c_num_map[col]}"
+                        wb.defined_names[named_range_name] = DefinedName(name=named_range_name, attr_text=f"'{sSheetTitle}'!${cell.column_letter}${cell.row}")
+            
+            self.format_all_cells(ws)
+            print(f"{sSheetTitle} completed")
+
+        except Exception as ex:
+            print(f"Error in {sSheetTitle}: {ex}")
+            import traceback
+            print(traceback.format_exc())
+
+    def A1P4_worksheet(self, wb):
+        try:
+            sTitle_WORKTABLE = "WORKTABLE A1 PART 4"
+            iColumnCount = 9
+            iWorkTableColumnCount = 3
+            sSheetTitle = "A1P4"
+            iLineNumberOffset = 393
+            sNamedRangePrefix = "A1L"
+
+            dtaValue0_RR = self.dtAValue0_RR
+            dtLineSourceText = self.dtLineSourceText
+            iCurrentYear = int(self.current_year)
+
+            print(f"Processing {sSheetTitle}")
+
+            # Select worktable and string rows
+            try:
+                part_str = sSheetTitle[sSheetTitle.index('P')+1:sSheetTitle.index('P')+3]
+            except ValueError:
+                part_str = sSheetTitle[sSheetTitle.index('P')+1:]
+            sSelectWorktable = f"Worktable = '{sSheetTitle[:2]}' And Part = '{part_str}'"
+            sSelectStringRows = f"Rpt_sheet = '{sSheetTitle}'"
+
+            ws = wb.create_sheet(title=sSheetTitle)
+
+            # Write titles and column headers
+            self.write_titles_and_column_headers(ws, self.dtTitles, sSelectWorktable, self.sTitle_RR_YEAR, sTitle_WORKTABLE, iColumnCount, sSheetTitle)
+            self.WriteFirst3ColumnsAndPageLayout(ws, self.dtLineSourceText, self.dtFootnotes, sSheetTitle, sSelectStringRows, sSelectWorktable)
+
+            ws.freeze_panes = ws['D8']
+
+            # Write hard values from dtaValue0_RR
+            for _, draValue0_RR in dtaValue0_RR[dtaValue0_RR["rpt_sheet"] == sSheetTitle].iterrows():
+                iProcessYear = int(draValue0_RR["year"])
+                if iProcessYear == iCurrentYear:
+                    iROW_COUNT = int(draValue0_RR["aline"]) - iLineNumberOffset
+                    aCode_id = int(draValue0_RR.get("acode_id", 0))
+
+                    if aCode_id % 2 == 0: # Even
+                        col, c_num = 5, 1
+                    else: # Odd
+                        col, c_num = 7, 2
+
+                    cell = ws.cell(row=iROW_COUNT, column=col, value=draValue0_RR["value"])
+                    cell.alignment = Alignment(horizontal="right")
+                    cell.number_format = "#,##0"
+                    sNamedRange = f"A1L{draValue0_RR['aline']}C{c_num}"
+                    wb.defined_names[sNamedRange] = DefinedName(name=sNamedRange, attr_text=f"'{sSheetTitle}'!${cell.column_letter}${cell.row}")
+
+            # Write sources and derived values
+            for _, drSource in dtLineSourceText[dtLineSourceText["rpt_sheet"] == sSheetTitle].iterrows():
+                iLine = int(drSource["line"]) - iLineNumberOffset
+
+                # Write source columns (C1 to C3)
+                for n in range(1, iWorkTableColumnCount + 1):
+                    col = 2 * n + 2
+                    c_name = f"c{n}"
+                    source_text = self.scrub_year(str(drSource.get(c_name, "")), iCurrentYear)
+                    ws.cell(row=iLine, column=col, value=f"'{source_text}" if source_text.startswith(('=', '+')) else source_text)
+
+                # Write derived value for C3
+                cell = ws.cell(row=iLine, column=9, value=drSource.get("c3", ""))
+                named_range_name = f"A1L{drSource['line']}C3"
+                wb.defined_names[named_range_name] = DefinedName(name=named_range_name, attr_text=f"'{sSheetTitle}'!${cell.column_letter}${cell.row}")
+
+                # Random Values for specific lines
+                if int(drSource["line"]) in {406, 426, 431, 439, 445, 449, 453, 457, 460, 465, 470, 475, 480}:
+                    # C1 value
+                    cell1 = ws.cell(row=iLine, column=5, value=drSource.get("c1", ""))
+                    cell1.number_format = "#,##0"
+                    wb.defined_names[f"A1L{drSource['line']}C1"] = DefinedName(name=f"A1L{drSource['line']}C1", attr_text=f"'{sSheetTitle}'!${cell1.column_letter}${cell1.row}")
+                    # C2 value
+                    cell2 = ws.cell(row=iLine, column=7, value=drSource.get("c2", ""))
+                    cell2.number_format = "#,##0"
+                    wb.defined_names[f"A1L{drSource['line']}C2"] = DefinedName(name=f"A1L{drSource['line']}C2", attr_text=f"'{sSheetTitle}'!${cell2.column_letter}${cell2.row}")
+            
+            self.format_all_cells(ws)
+            print(f"{sSheetTitle} completed")
+
+        except Exception as ex:
+            print(f"Error in {sSheetTitle}: {ex}")
+            import traceback
+            print(traceback.format_exc())
+
+    def A1P5A_worksheet(self, wb):
+        try:
+            sTitle_WORKTABLE = "WORKTABLE A1 PART 5A"
+            iColumnCount = 25
+            iWorkTableColumnCount = 11
+            sSheetTitle = "A1P5A"
+            iLineNumberOffset = 493
+            sNamedRangePrefix = "A1L"
+
+            dtCarTypeStatistics = self.dtCarTypeStatistics
+            dtaValueRegion_RR = self.dtAValueRegion_RR
+            dtLineSourceText = self.dtLineSourceText
+            iCurrentYear = int(self.current_year)
+
+            print(f"Processing {sSheetTitle}")
+
+            # Select worktable and string rows
+            try:
+                part_str = sSheetTitle[sSheetTitle.index('P')+1:sSheetTitle.index('P')+3]
+            except ValueError:
+                part_str = sSheetTitle[sSheetTitle.index('P')+1:]
+            sSelectWorktable = f"Worktable = '{sSheetTitle[:2]}' And Part = '{part_str}'"
+            sSelectStringRows = f"Rpt_sheet = '{sSheetTitle}'"
+
+            ws = wb.create_sheet(title=sSheetTitle)
+
+            # Write titles and column headers
+            self.write_titles_and_column_headers(ws, self.dtTitles, sSelectWorktable, self.sTitle_RR_YEAR, sTitle_WORKTABLE, iColumnCount, sSheetTitle)
+            self.WriteFirst3ColumnsAndPageLayout(ws, self.dtLineSourceText, self.dtFootnotes, sSheetTitle, sSelectStringRows, sSelectWorktable)
+
+            ws.freeze_panes = ws['D8']
+
+            # Write hard values from dtCarTypeStatistics
+            for _, drCarStats in dtCarTypeStatistics.iterrows():
+                iROW_COUNT = int(drCarStats["line"]) - iLineNumberOffset
+                col_map = { 5: "c1", 7: "c2", 9: "c3", 13: "c5", 15: "c6", 17: "c7", 19: "c8", 21: "c9", 23: "c10", 25: "c11" }
+                c_num_map = { 5: 1, 7: 2, 9: 3, 13: 5, 15: 6, 17: 7, 19: 8, 21: 9, 23: 10, 25: 11 }
+                for col, c_name in col_map.items():
+                    cell = ws.cell(row=iROW_COUNT, column=col, value=drCarStats.get(c_name, ""))
+                    cell.number_format = "#,##0.#####"
+                    if c_name == "c6":
+                        cell.number_format = openpyxl.styles.numbers.FORMAT_GENERAL
+                    named_range = f"A1L{drCarStats['line']}C{c_num_map[col]}"
+                    wb.defined_names[named_range] = DefinedName(name=named_range, attr_text=f"'{sSheetTitle}'!${cell.column_letter}${cell.row}")
+
+            # Write hard values from dtaValueRegion_RR
+            filtered_region_values = dtaValueRegion_RR[
+                (dtaValueRegion_RR["rpt_sheet"] == sSheetTitle) &
+                (dtaValueRegion_RR["year"] == iCurrentYear) &
+                (dtaValueRegion_RR["code"] == "C4")
+            ]
+            for _, draValueRegion in filtered_region_values.iterrows():
+                iROW_COUNT = int(draValueRegion["aline"]) - iLineNumberOffset
+                cell = ws.cell(row=iROW_COUNT, column=11, value=draValueRegion["value"])
+                named_range = f"A1L{draValueRegion['aline']}C4"
+                wb.defined_names[named_range] = DefinedName(name=named_range, attr_text=f"'{sSheetTitle}'!${cell.column_letter}${cell.row}")
+
+            # Write sources
+            for _, drSource in dtLineSourceText[dtLineSourceText["rpt_sheet"] == sSheetTitle].iterrows():
+                iLine = int(drSource["line"]) - iLineNumberOffset
+                for n in range(1, iWorkTableColumnCount + 1):
+                    col = 2 * n + 2
+                    c_name = f"c{n}"
+                    source_text = self.scrub_year(str(drSource.get(c_name, "")), iCurrentYear)
+                    ws.cell(row=iLine, column=col, value=f"'{source_text}" if source_text.startswith(('=', '+')) else source_text)
+            
+            self.format_all_cells(ws)
+            print(f"{sSheetTitle} completed")
+
+        except Exception as ex:
+            print(f"Error in {sSheetTitle}: {ex}")
+            import traceback
+            print(traceback.format_exc())
+
+    def recalculate_excel_formulas(self, filepath):
+        excel = win32com.client.Dispatch("Excel.Application")
+        excel.Visible = False
+        wb = excel.Workbooks.Open(filepath)
+        wb.RefreshAll()
+        wb.Save()
+        wb.Close()
+        excel.Quit()
 
 if __name__ == "__main__":
     
