@@ -5,4 +5,7 @@ def to_str(value):
     """
     if isinstance(value, str) and value != "":
         return str(value)
-    return value
+    elif value is None:
+        return ""
+    else:
+        return value

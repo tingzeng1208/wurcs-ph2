@@ -228,7 +228,7 @@ class CreateReports:
         self.build_index_worksheet(wb)
         self.A1P1_worksheet(wb)
         self.A1P2A_worksheet(wb)
-        # self.A1P2B_worksheet(wb) # Placeholder
+        self.A1P2B_worksheet(wb)
         # self.A1P2C_worksheet(wb) # Placeholder
 
         self.remove_default_sheet(wb)
@@ -324,16 +324,16 @@ class CreateReports:
         # Write first 3 columns from dtLineSourceText
         iROW_COUNT = 8
         for _, drRow in dtLineSourceText[dtLineSourceText["rpt_sheet"] == sSheetTitle].iterrows():
-            ws.cell(row=iROW_COUNT, column=1, value=str(drRow["line"]))
-            ws.cell(row=iROW_COUNT, column=2, value=str(drRow["code"]))
-            ws.cell(row=iROW_COUNT, column=3, value=str(drRow["identification"]))
+            ws.cell(row=iROW_COUNT, column=1, value=to_str(drRow["line"]))
+            ws.cell(row=iROW_COUNT, column=2, value=to_str(drRow["code"]))
+            ws.cell(row=iROW_COUNT, column=3, value=to_str(drRow["identification"]))
             iROW_COUNT += 1
 
         # Leave two rows, then write footnotes
         iROW_COUNT += 2
         for _, drRow in dtFootnotes[dtFootnotes["worktable"] == sSheetTitle[:2]][dtFootnotes["part"] == sSheetTitle[sSheetTitle.index('P')+1:sSheetTitle.index('P')+3]].iterrows():
-            ws.cell(row=iROW_COUNT, column=2, value=str(drRow["no"]))
-            ws.cell(row=iROW_COUNT, column=3, value=str(drRow["text"]))
+            ws.cell(row=iROW_COUNT, column=2, value=to_str(drRow["no"]))
+            ws.cell(row=iROW_COUNT, column=3, value=to_str(drRow["text"]))
             iROW_COUNT += 1
             
     def write_titles_and_column_headers(self, ws, dtTitles, sSelectWorktable, sTitle_RR_YEAR, sTitle_WORKTABLE, iColumnCount, sSheetTitle):
@@ -678,8 +678,122 @@ class CreateReports:
             import traceback
             print(traceback.format_exc())
 
+    def A1P2B_worksheet(self, wb):
+        try:
+            sTitle_WORKTABLE = "WORKTABLE A1 PART 2B"
+            iColumnCount = 57
+            sSheetTitle = "A1P2B"
+            iLineNumberOffset = 209
+
+            dtaValue = self.dtAValue
+            dtLineSourceText = self.dtLineSourceText
+            iCurrentYear = int(self.current_year)
+
+            print(f"Processing {sSheetTitle}")
+
+            # Select worktable and string rows
+            try:
+                part_str = sSheetTitle[sSheetTitle.index('P')+1:sSheetTitle.index('P')+3]
+            except ValueError:
+                part_str = sSheetTitle[sSheetTitle.index('P')+1:]
+            sSelectWorktable = f"Worktable = '{sSheetTitle[:2]}' And Part = '{part_str}'"
+            sSelectStringRows = f"Rpt_sheet = '{sSheetTitle}'"
+
+            ws = wb.create_sheet(title=sSheetTitle)
+
+            # Write titles and column headers
+            self.write_titles_and_column_headers(ws, self.dtTitles, sSelectWorktable, self.sTitle_RR_YEAR, sTitle_WORKTABLE, iColumnCount, sSheetTitle)
+            self.WriteFirst3ColumnsAndPageLayout(ws, self.dtLineSourceText, self.dtFootnotes, sSheetTitle, sSelectStringRows, sSelectWorktable)
+
+            ws.freeze_panes = ws['D8']
+
+            # Write hard values from dtaValue
+            for _, draValues in dtaValue[dtaValue["rpt_sheet"] == sSheetTitle].iterrows():
+                iProcessYear = int(draValues["year"])
+                iROW_COUNT = int(draValues["aline"]) - iLineNumberOffset
+                aCode_id = int(draValues.get("acode_id") or draValues.get("aCode_id", 0))
+
+                # Even/odd column mapping (same as A1P2A)
+                if aCode_id % 2 == 0:
+                    col_map = {
+                        iCurrentYear: 5, iCurrentYear - 1: 11, iCurrentYear - 2: 17,
+                        iCurrentYear - 3: 23, iCurrentYear - 4: 29
+                    }
+                    c_map = {
+                        iCurrentYear: 1, iCurrentYear - 1: 4, iCurrentYear - 2: 7,
+                        iCurrentYear - 3: 10, iCurrentYear - 4: 13
+                    }
+                else:
+                    col_map = {
+                        iCurrentYear: 7, iCurrentYear - 1: 13, iCurrentYear - 2: 19,
+                        iCurrentYear - 3: 25, iCurrentYear - 4: 31
+                    }
+                    c_map = {
+                        iCurrentYear: 2, iCurrentYear - 1: 5, iCurrentYear - 2: 8,
+                        iCurrentYear - 3: 11, iCurrentYear - 4: 14
+                    }
+
+                if iProcessYear in col_map:
+                    col = col_map[iProcessYear]
+                    c_num = c_map[iProcessYear]
+                    cell = ws.cell(row=iROW_COUNT, column=col, value=draValues["value"])
+                    cell.alignment = Alignment(horizontal="right")
+                    cell.number_format = "#,##0"
+                    sNamedRange = f"A1L{draValues['aline']}C{c_num}"
+                    wb.defined_names[sNamedRange] = DefinedName(name=sNamedRange, attr_text=f"'{sSheetTitle}'!${cell.column_letter}${cell.row}")
+
+            # Write sources and derived values
+            for _, drSource in dtLineSourceText[dtLineSourceText["rpt_sheet"] == sSheetTitle].iterrows():
+                iLine = int(drSource["line"]) - iLineNumberOffset
+
+                # Write all 27 source columns (C1 to C27) to columns 4,6,8,...,56
+                for n in range(1, 28):
+                    col = 2 * n + 2
+                    c_name = f"c{n}"
+                    source_text = self.scrub_year(str(drSource.get(c_name, "")), iCurrentYear)
+                    ws.cell(row=iLine, column=col, value=f"'{source_text}" if source_text.startswith(('=', '+')) else source_text)
+
+                # Write derived values (same as A1P2A)
+                derived_cols = [
+                    (9, 3), (15, 6), (21, 9), (27, 12), (33, 15), (35, 16), (37, 17), (39, 18),
+                    (41, 19), (43, 20), (45, 21), (47, 22), (49, 23), (51, 24), (53, 25), (55, 26), (57, 27)
+                ]
+                for col, c_num in derived_cols:
+                    c_name = f"c{c_num}"
+                    value = drSource.get(c_name, "")
+                    cell = ws.cell(row=iLine, column=col, value=value)
+                    cell.number_format = "#,##0"
+                    cell.alignment = Alignment(horizontal="right")
+                    named_range_name = f"A1L{drSource['line']}C{c_num}"
+                    wb.defined_names[named_range_name] = DefinedName(name=named_range_name, attr_text=f"'{sSheetTitle}'!${cell.column_letter}${cell.row}")
+
+                # Random Values for line 234
+                if int(drSource["line"]) == 234:
+                    random_value_cols = {
+                        5: "c1", 7: "c2", 11: "c4", 13: "c5", 17: "c7", 19: "c8",
+                        23: "c10", 25: "c11", 29: "c13", 31: "c14"
+                    }
+                    c_num_map = {
+                        5: 1, 7: 2, 11: 4, 13: 5, 17: 7, 19: 8,
+                        23: 10, 25: 11, 29: 13, 31: 14
+                    }
+                    for col, c_name in random_value_cols.items():
+                        c_num = c_num_map[col]
+                        value = drSource.get(c_name, "")
+                        cell = ws.cell(row=iLine, column=col, value=value)
+                        cell.number_format = "#,##0"
+                        cell.alignment = Alignment(horizontal="right")
+                        named_range_name = f"A1L{drSource['line']}C{c_num}"
+                        wb.defined_names[named_range_name] = DefinedName(name=named_range_name, attr_text=f"'{sSheetTitle}'!${cell.column_letter}${cell.row}")
+
+            print(f"{sSheetTitle} completed")
+
+        except Exception as ex:
+            print(f"Error in {sSheetTitle}: {ex}")
+            import traceback
+            print(traceback.format_exc())
+
 if __name__ == "__main__":
     
     create_reports = CreateReports(2023)
     create_reports.create_reports()
-
