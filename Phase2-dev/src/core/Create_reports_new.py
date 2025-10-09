@@ -309,7 +309,7 @@ class CreateReports:
                 ("Include Account 76:", "Y" if self.o_db.db_data.Account76 else "N", "INCL_ACCT_76"),
                 ("Include Account 80:", "Y" if self.o_db.db_data.Account80 else "N", "INCL_ACCT_80"),
                 ("Include Account 90:", "Y" if self.o_db.db_data.Account90 else "N", "INCL_ACCT_90"),
-                ("SSAC:", "Y" if self.o_db.db_data.SSAC else "N", "INCL_SSAC"),
+                ("SSAC:", "Y" if self.o_db.db_data.SSAC else "N", "SSAC"),
                 ("Replace Null Values With:", str(self.o_db.db_data.NullStringReplace), "NULL_VALUE"),
             ]
             for idx, (label, value, name) in enumerate(user_inputs, start=5):
@@ -1670,7 +1670,7 @@ class CreateReports:
                 # Price Index helper
                 def get_pi(index, year_col_name):
                     pi_row = self.dtPriceIndexes[self.dtPriceIndexes['index'] == index]
-                    print(f"Value_str is {value_str} Fetching PI for index {index}, year column {year_col_name}: Found {len(pi_row)} rows")
+                    # print(f"Value_str is {value_str} Fetching PI for index {index}, year column {year_col_name}: Found {len(pi_row)} rows")
                     return "0" if value_str == 0 else pi_row.iloc[0][year_col_name] if not pi_row.empty else "0"
 
                 # --- Start of faithful translation of the large If/ElseIf block ---
@@ -1797,7 +1797,7 @@ class CreateReports:
                 source_cols = [4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 86, 88]
                 for idx, col_num in enumerate(source_cols):
                     c_name = f"c{idx + 1}"
-                    source_text = self.scrub_year(str(drSource.get(c_name, "")), iCurrentYear)
+                    source_text = self.scrub_year(to_str(drSource.get(c_name, "")), iCurrentYear)
                     ws.cell(row=iLine, column=col_num, value=f"'{source_text}" if source_text.startswith(('=', '+')) else source_text)
 
                 if iLine == 88: # Line 181
