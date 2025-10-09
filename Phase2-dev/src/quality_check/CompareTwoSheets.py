@@ -6,7 +6,6 @@ from datetime import datetime
 
 
 
-
 def compare_worksheets(workbook1_path: str, worksheet1_name: str, 
                       workbook2_path: str, worksheet2_name: str,
                       max_row: Optional[int] = None, max_col: Optional[int] = None,
@@ -193,69 +192,90 @@ def compare_worksheets(workbook1_path: str, worksheet1_name: str,
     }
 
 
-def compare_worksheets_detailed(workbook1_path: str, worksheet1_name: str,
-                               workbook2_path: str, worksheet2_name: str,
-                               output_file: Optional[str] = None,
-                               **kwargs) -> Dict[str, Any]:
+
+def compare_two_workbooks(workbook1_path: str, 
+                           workbook2_path: str, 
+                           case_sensitive: bool = False):
     """
-    Compare worksheets and optionally save detailed results to a file.
+    Compare two Excel workbooks and return the comparison results.
+    """
     
-    Args:
-        workbook1_path (str): Path to the first Excel workbook
-        worksheet1_name (str): Name of worksheet in first workbook
-        workbook2_path (str): Path to the second Excel workbook
-        worksheet2_name (str): Name of worksheet in second workbook
-        output_file (str, optional): Path to save detailed comparison results
-        **kwargs: Additional arguments passed to compare_worksheets()
+    reports_dir = os.path.join(os.path.dirname(__file__), "../..", "reports")
+    source_wb1 = os.path.abspath(os.path.join(reports_dir, "CN2023.xlsx"))
+    target_wb2 = os.path.abspath(os.path.join(reports_dir, "CN-2023_report.xlsx"))
+    
+    wb2 = load_workbook(os.path.abspath(os.path.join(reports_dir, "CN-2023_report.xlsx")), data_only=True)
+
+    # Remove ComparisonResult.txt if it exists
+    comparison_result_path = os.path.join(reports_dir, "ComparisonResult.txt")
+    if os.path.exists(comparison_result_path):
+        os.remove(comparison_result_path)
         
-    Returns:
-        Dict containing comparison results
-    """
-    
-    result = compare_worksheets(workbook1_path, worksheet1_name, 
-                               workbook2_path, worksheet2_name, **kwargs)
-    
-    if result.get("success") and output_file:
-        try:
-            with open(output_file, 'a', encoding='utf-8') as f:
-                f.write(f"Excel Worksheet Comparison Report\n")
-                f.write(f"Generated: {datetime.now()}\n")
-                f.write(f"="*80 + "\n\n")
-                
-                f.write(f"Source Files:\n")
-                f.write(f"  Workbook 1: {result['workbook1_path']} -> {result['worksheet1_name']}\n")
-                f.write(f"  Workbook 2: {result['workbook2_path']} -> {result['worksheet2_name']}\n\n")
-                
-                f.write(f"Comparison Settings:\n")
-                f.write(f"  Max Row: {result['max_row']}\n")
-                f.write(f"  Max Col: {result['max_col']}\n")
-                f.write(f"  Case Sensitive: {result['case_sensitive']}\n\n")
-                
-                f.write(f"Summary:\n")
-                f.write(f"  Total cells compared: {result['total_cells_compared']:,}\n")
-                f.write(f"  Identical cells: {result['identical_cells']:,}\n")
-                f.write(f"  Different cells: {result['different_cells']:,}\n")
-                f.write(f"  Match percentage: {result['match_percentage']:.2f}%\n\n")
-                
-                if result['differences']:
-                    f.write(f"Differences Found ({len(result['differences'])}):\n")
-                    f.write(f"{'Cell':8} {'Workbook 1':25} {'Workbook 2':25}\n")
-                    f.write(f"{'-'*8} {'-'*25} {'-'*25}\n")
-                    
-                    for diff in result['differences']:
-                        f.write(f"{diff['cell']:8} {str(diff['workbook1_display'])[:24]:25} {str(diff['workbook2_display'])[:24]:25}\n")
-                else:
-                    f.write("No differences found - worksheets are identical!\n")
-                    
-            print(f"\nDetailed comparison report saved to: {output_file}")
-            
-        except Exception as e:
-            print(f"Error saving detailed report: {e}")
-    
-    return result
+    sheetnames = wb2.sheetnames
 
+    all_results = []
+    total_cells = 0
+    total_identical = 0
+    total_different = 0
+    sheet_summaries = []
 
+    for sheetname in sheetnames:
+        print(f"\nComparing worksheet: {sheetname}")
+        if os.path.exists(source_wb1) and os.path.exists(target_wb2):
+            result = compare_worksheets(
+                workbook1_path=source_wb1,
+                worksheet1_name=sheetname, 
+                workbook2_path=target_wb2,
+                worksheet2_name=sheetname,
+                case_sensitive=False
+            )
+            print(f"\nComparison completed. Success: {result.get('success', False)}")
+            all_results.append(result)
+            total_cells += result.get('total_cells_compared', 0)
+            total_identical += result.get('identical_cells', 0)
+            total_different += result.get('different_cells', 0)
+            sheet_summaries.append(
+                f"Sheet '{sheetname}': {result.get('identical_cells', 0)} identical, {result.get('different_cells', 0)} different, Match: {result.get('match_percentage', 0):.2f}%"
+            )
+        else:
+            print("One or both Excel files not found:")
+            print(f"  File 1 exists: {os.path.exists(source_wb1)} - {source_wb1}")
+            print(f"  File 2 exists: {os.path.exists(target_wb2)} - {target_wb2}")
 
+    # Print overall summary
+    print("\n" + "="*80)
+    print("Overall Comparison Summary:")
+    for summary in sheet_summaries:
+        print(summary)
+    print(f"\nTotal sheets compared: {len(sheetnames)}")
+    print(f"Number of identical sheets: {len([s for s in sheet_summaries if 'different, Match: 100.00%' in s])}")
+    print(f"Number of different sheets: {len(sheetnames) - len([s for s in sheet_summaries if 'different, Match: 100.00%' in s])}")
+    print(f"\nTotal cells compared: {total_cells:,}")
+    print(f"Total identical cells: {total_identical:,}")
+    print(f"Total different cells: {total_different:,}")
+    if total_cells > 0:
+        print(f"Overall match percentage: {(total_identical/total_cells)*100:.2f}%")
+    print("="*80)
+
+    # Write overall summary to ComparisonResult.txt
+    try:
+        with open(comparison_result_path, 'a', encoding='utf-8') as f:
+            f.write("\n" + "="*80 + "\n")
+            f.write("Overall Comparison Summary:\n")
+            for summary in sheet_summaries:
+                f.write(summary + "\n")
+            f.write(f"\nTotal sheets compared: {len(sheetnames)}")
+            f.write(f"\nNumber of identical sheets: {len([s for s in sheet_summaries if 'different, Match: 100.00%' in s])}")
+            f.write(f"\nNumber of different sheets: {len(sheetnames) - len([s for s in sheet_summaries if 'different, Match: 100.00%' in s])}\n")
+            f.write(f"\nTotal cells compared: {total_cells:,}\n")
+            f.write(f"Total identical cells: {total_identical:,}\n")
+            f.write(f"Total different cells: {total_different:,}\n")
+            if total_cells > 0:
+                f.write(f"Overall match percentage: {(total_identical/total_cells)*100:.2f}%\n")
+            f.write("="*80 + "\n")
+    except Exception as e:
+        print(f"Error writing overall summary: {e}")
+    return all_results
 
 # Example usage and test function
 if __name__ == "__main__":
@@ -267,41 +287,14 @@ if __name__ == "__main__":
     source_wb1 = os.path.abspath(os.path.join(reports_dir, "CN2023.xlsx"))
     target_wb2 = os.path.abspath(os.path.join(reports_dir, "CN-2023_report.xlsx"))
 
-    # Remove ComparisonResult.txt if it exists
-    comparison_result_path = os.path.join(reports_dir, "ComparisonResult.txt")
-    if os.path.exists(comparison_result_path):
-        os.remove(comparison_result_path)
+    # Check if files exist
+    if not os.path.exists(source_wb1):
+        print(f"Source workbook not found: {source_wb1}")
+    if not os.path.exists(target_wb2):
+        print(f"Target workbook not found: {target_wb2}")
+        
+    compare_two_workbooks(source_wb1, target_wb2, case_sensitive=False)
 
-    sheetnames = ["INDEX", "A1P1", "A1P2A", "A1P2B", "A1P2C", "A1P3A"]
-
-    for sheetname in sheetnames:
-        print(f"\nComparing worksheet: {sheetname}")
-
-        # Check if files exist
-        if os.path.exists(source_wb1) and os.path.exists(target_wb2):
-            # Compare the actual worksheets
-            result = compare_worksheets(
-                workbook1_path=source_wb1,
-                worksheet1_name=sheetname, 
-                workbook2_path=target_wb2,
-                worksheet2_name=sheetname,
-                case_sensitive=False
-            )
-            print(f"\nComparison completed. Success: {result.get('success', False)}")
-        else:
-            print("One or both Excel files not found:")
-            print(f"  File 1 exists: {os.path.exists(source_wb1)} - {source_wb1}")
-            print(f"  File 2 exists: {os.path.exists(target_wb2)} - {target_wb2}")
-
-            # Example with placeholder paths
-            print("\nExample usage:")
-            result = compare_worksheets(
-                workbook1_path="path/to/workbook1.xlsx",
-                worksheet1_name="Sheet1", 
-                workbook2_path="path/to/workbook2.xlsx",
-                worksheet2_name="Sheet1",
-                case_sensitive=False
-            )
     # Example 2: Compare with detailed output
     # result = compare_worksheets_detailed(
     #     workbook1_path="path/to/workbook1.xlsx",

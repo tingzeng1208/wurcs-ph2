@@ -131,6 +131,7 @@ def test_delete_all_records(reset_singletons, fake_db_class):
     dbm.delete_all_records("dbx", "tblx")
     q, _ = dbm._get_connection().non_query_calls[-1]
     assert q == "DELETE FROM dbx.tblx"
+    
 
 def test_generate_e_values_xml_success(reset_singletons, monkeypatch, fake_db_class):
     class CtxConn:

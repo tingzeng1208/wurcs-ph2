@@ -103,11 +103,15 @@ class DBManager:
     
     def get_data_dictionary(self, year):    
         
-        tablename = self._get_table_name_from_sql(1, "DATA_DICTIONARY")
-        # SELECT * FROM R_Data_Dictionary WHERE Effective_Dt <= 2023 And Expiration_Dt > 2023 ORDER BY URCSID
-        query = f"SELECT * FROM {self.db_data.schema}.{tablename} where Effective_Dt <= %s and Expiration_Dt > %s ORDER BY URCSID"
-        params = (year, year)        
-        df = self.execute_sql_query_set(query, params)
+        tablename = self._get_table_name_from_sql("1", "DATA_DICTIONARY")
+        
+        query = (f"SELECT SUBSTRING(WTALL,1,6) Line, MAX(AnnPeriod) AnnPeriod "
+                f"FROM {self.db_data.schema}.{tablename} "
+                f"WHERE Effective_Dt <= {year} "
+                f"AND Expiration_Dt > {year} "
+                f"GROUP BY SUBSTRING(WTALL,1,6) ORDER BY 1")
+        
+        df = self.execute_sql_query_set(query)
         num_rows, num_columns = df.shape
 
         print(f"GetDataDictionary: {year} Number of records: {num_rows}")
@@ -232,7 +236,7 @@ class DBManager:
             JOIN {acode_db}.{acode_table} ac On at.aCode_id = ac.aCode_id
             WHERE RR_Id = {railroad_number} ORDER BY acode_id
             """
-            # print(f"get_a_value query is {str(query)}")
+            print(f"get_a_value query is {str(query)}")
             # add column to df
             columns = ["Year", "aCode_id", "Value", "aLine", "Rpt_sheet", "aColumn"]
             df = self.execute_sql_query_set(query)
@@ -307,7 +311,9 @@ class DBManager:
             FROM {controls_db}.{price_index_table} p 
             INNER JOIN {controls_db}.{class1_table} rr ON p.Region = rr.REGION_ID 
             WHERE rr.RR_ID = {railroad_number} AND YEAR = {year}
-            """
+            """            
+            
+            print(f"get_price_index query is {query}")
             
             df = self.execute_sql_query_set(query)
             return df
@@ -351,7 +357,7 @@ class DBManager:
             WHERE rr.RR_ID = {railroad_number}
             """
             
-            df = self.execute_sql(query)
+            df = self.execute_sql_query_set(query)
             return df
             
         except Exception as e:

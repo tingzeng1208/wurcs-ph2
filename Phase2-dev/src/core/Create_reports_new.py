@@ -1647,15 +1647,22 @@ class CreateReports:
                 iProcessYear = int(draValues["year"])
                 aLine = int(draValues["aline"])
                 acode_id = int(draValues["acode_id"])
-                value_str = str(draValues["value"])
+                value_str = to_str(draValues["value"])
+                # print(f"Processing Line {aLine}, Code {acode_id}, Year {iProcessYear}, Value {value_str}")
+
+                if value_str == 1.399175 or value_str == '1.399175':
+                    
+                    print(f"Debug: Line {aLine}, Code {acode_id}, Value {value_str}")
 
                 drAnnPeriod = self.dtDataDictionary[self.dtDataDictionary["line"] == f"A2L{aLine}"]
+
                 iROW_COUNT = aLine - iLineNumberOffset
 
                 iCodeOffset = 898 if aLine < 142 else 1267
                 iRowOffset = 8 if aLine < 142 else 82
 
                 if iProcessYear == iCurrentYear and not drAnnPeriod.empty:
+                    # print(f"Setting annperiod for line {aLine} to {drAnnPeriod.iloc[0]['annperiod']}")
                     set_cell(iROW_COUNT, 5, drAnnPeriod.iloc[0]["annperiod"], f"A2L{aLine}C1")
 
                 is_main_block = (aLine < 142) or (174 < aLine < 181)
@@ -1663,7 +1670,8 @@ class CreateReports:
                 # Price Index helper
                 def get_pi(index, year_col_name):
                     pi_row = self.dtPriceIndexes[self.dtPriceIndexes['index'] == index]
-                    return "0" if value_str == "0" else pi_row.iloc[0][year_col_name] if not pi_row.empty else "0"
+                    print(f"Value_str is {value_str} Fetching PI for index {index}, year column {year_col_name}: Found {len(pi_row)} rows")
+                    return "0" if value_str == 0 else pi_row.iloc[0][year_col_name] if not pi_row.empty else "0"
 
                 # --- Start of faithful translation of the large If/ElseIf block ---
 
@@ -1781,14 +1789,16 @@ class CreateReports:
             # WRITE OUT THE SOURCES AND ANY VALUES THAT EXECUTE THE SOURCE
             for _, drSource in self.dtLineSourceText[self.dtLineSourceText["rpt_sheet"] == sSheetTitle].iterrows():
                 iLine = int(drSource["line"]) - iLineNumberOffset
+                # print(f"Processing line {iLine} , source line {drSource['line']} and iLineNumberOffset {iLineNumberOffset}")
                 aline_str = str(drSource["line"])
+                # print(f"Processing sources for line {aline_str}")
 
                 # Sources first
                 source_cols = [4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 86, 88]
                 for idx, col_num in enumerate(source_cols):
                     c_name = f"c{idx + 1}"
                     source_text = self.scrub_year(str(drSource.get(c_name, "")), iCurrentYear)
-                    ws.cell(row=iLine, column=col_num, value=f"'{source_text}")
+                    ws.cell(row=iLine, column=col_num, value=f"'{source_text}" if source_text.startswith(('=', '+')) else source_text)
 
                 if iLine == 88: # Line 181
                     set_cell(iLine, 7, drSource["c2"], f"A2L{aline_str}C2", "#,##0")
@@ -1834,10 +1844,12 @@ class CreateReports:
                     set_cell(iLine, 87, drSource["c42"], f"A2L{aline_str}C42", "#,##0")
                     set_cell(iLine, 89, "=NULL_VALUE", f"A2L{aline_str}C43")
                     ws.cell(row=iLine, column=90, value=f"'{self.scrub_year(drSource.get('c44', ''), iCurrentYear)}")
+                    # print(f"C44 source is at row: {iLine}, column: 90 is {drSource.get('c44', '')}")
                     set_cell(iLine, 91, drSource["c44"], f"A2L{aline_str}C44", "#,##0")
                 else:
-                    sSource = self.get_source_for_a2_summary_column(drSource["line"], iLine)
-                    ws.cell(row=iLine, column=90, value=f"'{sSource}")
+                    sSource = self.get_source_for_a2_summary_column(ws, drSource["line"], iLine)
+                    ws.cell(row=iLine, column=90, value=f"'{sSource if len(sSource) > 0 else ''}")
+                    # print(f"row {iLine} column 90 source is {sSource}")
                     set_cell(iLine, 91, sSource, f"A2L{aline_str}C44", "#,##0")
 
             self.format_all_cells(ws)
@@ -1848,19 +1860,34 @@ class CreateReports:
             import traceback
             print(traceback.format_exc())
 
-    def get_source_for_a2_summary_column(self, line_no, row_index):
-        # This is a placeholder for the complex logic in the VB.NET GetSourceForA2SummaryColumn
-        # It appears to build a SUM formula based on other cells in the same row.
-        # A more robust implementation would parse the dependencies from dtLineSourceText.
-        try:
-            if 8 <= row_index <= 87: # Corresponds to lines 101-180
-                return f"=SUM(A2L{line_no}C2,A2L{line_no}C4,A2L{line_no}C6,A2L{line_no}C8)"
-            return ""
+    def get_source_for_a2_summary_column(self, ws, line_number, cell_line_number):
+        sReturn = ""
 
-        except Exception as ex:
-            print(f"Error in {sSheetTitle}: {ex}")
-            import traceback
-            print(traceback.format_exc())
+        oCell = ws.cell(row=cell_line_number, column=5)
+        try:
+            iPeriod = int(oCell.value) if oCell.value is not None else 0
+        except (ValueError, TypeError):
+            iPeriod = 0
+
+        if iPeriod > 0:
+            sReturn = "=SUM(A2L" + str(line_number) + "C10"
+
+            if iPeriod > 1:
+                sReturn = sReturn + ",PRODUCT(A2L" + str(line_number) + "C12,A2L" + str(line_number) + "C13),PRODUCT(A2L" + str(line_number) + "C14,A2L" + str(line_number) + "C15),PRODUCT(A2L" + str(line_number) + "C16,A2L" + str(line_number) + "C17),PRODUCT(A2L" + str(line_number) + "C18,A2L" + str(line_number) + "C19)"
+            if iPeriod > 2:
+                sReturn = sReturn + ",PRODUCT(A2L" + str(line_number) + "C20,A2L" + str(line_number) + "C21),PRODUCT(A2L" + str(line_number) + "C22,A2L" + str(line_number) + "C23),PRODUCT(A2L" + str(line_number) + "C24,A2L" + str(line_number) + "C25),PRODUCT(A2L" + str(line_number) + "C26,A2L" + str(line_number) + "C27)"
+            if iPeriod > 3:
+                sReturn = sReturn + ",PRODUCT(A2L" + str(line_number) + "C28,A2L" + str(line_number) + "C29),PRODUCT(A2L" + str(line_number) + "C30,A2L" + str(line_number) + "C31),PRODUCT(A2L" + str(line_number) + "C32,A2L" + str(line_number) + "C33),PRODUCT(A2L" + str(line_number) + "C34,A2L" + str(line_number) + "C35)"
+            if iPeriod > 4:
+                sReturn = sReturn + ",PRODUCT(A2L" + str(line_number) + "C36,A2L" + str(line_number) + "C37),PRODUCT(A2L" + str(line_number) + "C38,A2L" + str(line_number) + "C39),PRODUCT(A2L" + str(line_number) + "C40,A2L" + str(line_number) + "C41),PRODUCT(A2L" + str(line_number) + "C42,A2L" + str(line_number) + "C43)"
+
+            sReturn = sReturn + ")/A2L" + str(line_number) + "C1"
+
+            # print(f"Source for line {line_number} (cell line {cell_line_number}): {sReturn}")
+        else:
+            sReturn = ""
+
+        return sReturn
 
     def recalculate_excel_formulas(self, filepath):
         excel = win32com.client.Dispatch("Excel.Application")

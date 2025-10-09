@@ -19,5 +19,6 @@ dependencies = [
 	"openpyxl",
 	"pytest",
 	"pytest-cov",
+	"pywin32",
 	"git-filter-repo"
 	]
