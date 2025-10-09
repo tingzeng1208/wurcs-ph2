@@ -98,11 +98,12 @@ def compare_worksheets(workbook1_path: str, worksheet1_name: str,
 
             # Treat as identical if only difference is a single leading apostrophe
             def strip_leading_apostrophe(s):
-                return s[1:] if s.startswith("'") else s
+                ans = s[1:] if s.startswith("'") else s
+                return ans[1:] if ans.startswith("=") or ans.startswith("+") else ans
 
             if str1 != str2:
                 # Check for leading apostrophe difference
-                if strip_leading_apostrophe(str1) == str2 or str1 == strip_leading_apostrophe(str2):
+                if strip_leading_apostrophe(str1) == strip_leading_apostrophe(str2):
                     identical_cells += 1
                     continue  # Considered identical, skip to next cell
 
