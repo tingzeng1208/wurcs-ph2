@@ -287,6 +287,10 @@ class CreateReports:
         self.A2P2_worksheet(wb)
         self.A2P3_worksheet(wb)
         self.A2P4_worksheet(wb)
+        self.A3P1_worksheet(wb)
+        self.A3P2_worksheet(wb)
+        self.A3P3_worksheet(wb)
+        
 
         self.remove_default_sheet(wb)
         wb.save(full_path)
@@ -2719,6 +2723,665 @@ class CreateReports:
             import traceback
             print(traceback.format_exc())
 
+    def get_source_for_a3p1_summary_column(self, line, iLine):
+        """
+        VB: GetSourceForA3P1SummaryColumn(line, iLine)
+        Purpose: return the source string for the C12 (last) column on A3P1 rows
+        when the row is NOT one of the special derived rows.
+        Implementation: pull C12 from dtLineSourceText for the given line and scrub it.
+        """
+        try:
+            row = self.dtLineSourceText[self.dtLineSourceText["line"].astype(str) == str(line)]
+            if row.empty:
+                return ""
+            s = to_str(row.iloc[0].get("c12", ""))
+            return self.scrub_year(s, int(self.current_year))
+        except Exception:
+            return ""
+
+
+    def get_source_for_a3p2_summary_column(self, line, iLine, k):
+        """
+        VB: GetSourceForA3P2SummaryColumn(line, iLine, k)
+        Purpose: return the source string for the summary columns C37..C42 on A3P2.
+                In VB they called this with k = 3..8 and then wrote to C37..C42.
+        Mapping: C37..C42 correspond to source keys C(34+k) => c37..c42.
+                (k=3 -> c37, k=4 -> c38, ..., k=8 -> c42)
+        Implementation: pull the appropriate C# from dtLineSourceText and scrub it.
+        """
+        try:
+            # Map k (3..8) -> column key name in dtLineSourceText: c37..c42
+            col_num = 34 + int(k)  # 34+3=37 .. 34+8=42
+            key = f"c{col_num}"
+            row = self.dtLineSourceText[self.dtLineSourceText["line"].astype(str) == str(line)]
+            if row.empty:
+                return ""
+            s = to_str(row.iloc[0].get(key, ""))
+            return self.scrub_year(s, int(self.current_year))
+        except Exception:
+            return ""
+
+
+    def get_source_for_a3p3to_p8_summary_column(self, line, iLine):
+        """
+        VB: GetSourceForA3P3toP8SummaryColumn(line, iLine)
+        Purpose: return the source string for the C12 (last) column on A3P3..A3P8
+                when the row is NOT one of the special derived rows.
+        Implementation: pull C12 from dtLineSourceText for the given line and scrub it.
+        """
+        try:
+            row = self.dtLineSourceText[self.dtLineSourceText["line"].astype(str) == str(line)]
+            if row.empty:
+                return ""
+            s = to_str(row.iloc[0].get("c12", ""))
+            return self.scrub_year(s, int(self.current_year))
+        except Exception:
+            return ""
+
+    # --------------------------
+    # A3P1
+    # --------------------------
+    def A3P1_worksheet(self, wb):
+        try:
+            # BUILD THE WORKTABLE TITLE AND SET WORKTABLE VARS
+            sTitle_WORKTABLE = "WORKTABLE A3 PART 1"
+            iColumnCount = 27
+            iWorkTableColumnCount = 12
+            sSheetTitle = "A3P1"
+            iLineNumberOffset = 93
+            sNamedRangePrefix = "A3L"
+
+            print(f"Processing {sSheetTitle}")
+
+            # SHEET + FREEZE
+            ws = wb.create_sheet(title=sSheetTitle)
+            ws.freeze_panes = ws['D8']
+
+            # SELECT STRINGS
+            part_str = sSheetTitle[sSheetTitle.find('P')+1:]
+            part_only = part_str[:2] if len(part_str) >= 2 and part_str[:2].isdigit() else part_str[:1]
+            sSelectWorktable = f"Worktable = '{sSheetTitle[:2]}' And Part = '{part_only}'"
+            sSelectStringRows = f"Rpt_sheet = '{sSheetTitle}'"
+
+            # TITLES + FIRST 3 COLS
+            self.write_titles_and_column_headers(
+                ws, self.dtTitles, sSelectWorktable,
+                self.sTitle_RR_YEAR, sTitle_WORKTABLE,
+                iColumnCount, sSheetTitle
+            )
+            self.WriteFirst3ColumnsAndPageLayout(
+                ws, self.dtLineSourceText, self.dtFootnotes,
+                sSheetTitle, sSelectStringRows, sSelectWorktable
+            )
+
+            # Helpers
+            def set_cell(row, col, value, name=None, num_format=None, align_right=True):
+                c = ws.cell(row=row, column=col, value=value)
+                if name:
+                    wb.defined_names[name] = DefinedName(
+                        name=name, attr_text=f"'{sSheetTitle}'!${c.column_letter}${c.row}"
+                    )
+                if align_right:
+                    c.alignment = Alignment(horizontal="right")
+                if num_format:
+                    c.number_format = num_format
+                return c
+
+            def get_pi(index, year_col_name, value_str):
+                if str(value_str) in ("0", "0.0") or value_str == 0:
+                    return "0"
+                df = self.dtPriceIndexes[self.dtPriceIndexes['index'] == index]
+                return "0" if df.empty else df.iloc[0][year_col_name]
+
+            iCurrentYear = int(self.current_year)
+            excluded_lines = {110, 120, 130, 140, 150, 160, 168, 178}
+
+            # WRITE HARD VALUES
+            for _, r in self.dtAValue[self.dtAValue["rpt_sheet"] == sSheetTitle].iterrows():
+                aLine = int(r["aline"])
+                if aLine in excluded_lines:
+                    continue
+
+                iProcessYear = int(r["year"])
+                iROW_COUNT = aLine - iLineNumberOffset
+                dd = self.dtDataDictionary[self.dtDataDictionary["line"] == f"{sNamedRangePrefix}{aLine}"]
+
+                # Current year
+                if iProcessYear == iCurrentYear:
+                    if not dd.empty:
+                        set_cell(iROW_COUNT, 5, dd.iloc[0]["annperiod"], f"{sNamedRangePrefix}{aLine}C1")
+                    set_cell(iROW_COUNT, 9,  get_pi(22, "current_year", r["value"]), f"{sNamedRangePrefix}{aLine}C3", "0.0000")
+                    set_cell(iROW_COUNT, 7,  to_str(r["value"]),                      f"{sNamedRangePrefix}{aLine}C2", "#,##0")
+
+                # CY-1
+                elif iProcessYear == iCurrentYear - 1:
+                    set_cell(iROW_COUNT, 13, get_pi(22, "current_year_minus_1", r["value"]), f"{sNamedRangePrefix}{aLine}C5", "0.0000")
+                    set_cell(iROW_COUNT, 11, to_str(r["value"]),                             f"{sNamedRangePrefix}{aLine}C4", "#,##0")
+
+                # CY-2
+                elif iProcessYear == iCurrentYear - 2:
+                    set_cell(iROW_COUNT, 17, get_pi(22, "current_year_minus_2", r["value"]), f"{sNamedRangePrefix}{aLine}C7", "0.0000")
+                    set_cell(iROW_COUNT, 15, to_str(r["value"]),                             f"{sNamedRangePrefix}{aLine}C6", "#,##0")
+
+                # CY-3
+                elif iProcessYear == iCurrentYear - 3:
+                    set_cell(iROW_COUNT, 21, get_pi(22, "current_year_minus_3", r["value"]), f"{sNamedRangePrefix}{aLine}C9", "0.0000")
+                    set_cell(iROW_COUNT, 19, to_str(r["value"]),                             f"{sNamedRangePrefix}{aLine}C8", "#,##0")
+
+                # CY-4
+                elif iProcessYear == iCurrentYear - 4:
+                    set_cell(iROW_COUNT, 25, get_pi(22, "current_year_minus_4", r["value"]), f"{sNamedRangePrefix}{aLine}C11", "0.0000")
+                    set_cell(iROW_COUNT, 23, to_str(r["value"]),                             f"{sNamedRangePrefix}{aLine}C10", "#,##0")
+
+            # SOURCES + special excluded lines
+            for _, dr in self.dtLineSourceText[self.dtLineSourceText["rpt_sheet"] == sSheetTitle].iterrows():
+                line = int(dr["line"])
+                iLine = line - iLineNumberOffset
+
+                # Sources C1..C12 -> cols 4..26 (even columns)
+                for idx, col in enumerate(range(4, 27, 2), start=1):
+                    key = f"c{idx}"
+                    ws.cell(row=iLine, column=col, value=apostrophe(self.scrub_year(to_str(dr.get(key, "")), iCurrentYear)))
+
+                if line in excluded_lines:
+                    # Alternating NULL/value pattern
+                    pairs = [
+                        (5, "C1",  True),  (7,  "C2", False),
+                        (9, "C3",  True),  (11, "C4", False),
+                        (13,"C5",  True),  (15, "C6", False),
+                        (17,"C7",  True),  (19, "C8", False),
+                        (21,"C9",  True),  (23, "C10", False),
+                        (25,"C11", True),  (27, "C12", False),
+                    ]
+                    for col, cnum, is_null in pairs:
+                        if is_null:
+                            set_cell(iLine, col, "=NULL_VALUE", f"{sNamedRangePrefix}{line}{cnum}")
+                        else:
+                            # scrubbed numeric text, formatted as number
+                            set_cell(iLine, col, self.scrub_year(to_str(dr[cnum.lower()]), iCurrentYear),
+                                    f"{sNamedRangePrefix}{line}{cnum}", "#,##0")
+                else:
+                    # Create source for C12
+                    sSource = self.get_source_for_a3p1_summary_column(line, iLine)
+                    ws.cell(row=iLine, column=26, value=apostrophe(sSource) if len(sSource) > 0 else "")
+                    set_cell(iLine, 27, sSource, f"{sNamedRangePrefix}{line}C12", "#,##0")
+
+            self.format_all_cells(ws)
+            print(f"{sSheetTitle} completed")
+        except Exception as ex:
+            print(f"Error in {sSheetTitle}: {ex}")
+            import traceback; print(traceback.format_exc())
+
+
+    # --------------------------
+    # A3P2
+    # --------------------------
+    def A3P2_worksheet(self, wb):
+        try:
+            sTitle_WORKTABLE = "WORKTABLE A3 PART 2"
+            iColumnCount = 89
+            iWorkTableColumnCount = 43
+            sSheetTitle = "A3P2"
+            iLineNumberOffset = 193
+            sNamedRangePrefix = "A3L"
+
+            print(f"Processing {sSheetTitle}")
+            ws = wb.create_sheet(title=sSheetTitle)
+            ws.freeze_panes = ws['D8']
+
+            part_str = sSheetTitle[sSheetTitle.find('P')+1:]
+            part_only = part_str[:2] if len(part_str) >= 2 and part_str[:2].isdigit() else part_str[:1]
+            sSelectWorktable = f"Worktable = '{sSheetTitle[:2]}' And Part = '{part_only}'"
+            sSelectStringRows = f"Rpt_sheet = '{sSheetTitle}'"
+
+            self.write_titles_and_column_headers(ws, self.dtTitles, sSelectWorktable,
+                                                self.sTitle_RR_YEAR, sTitle_WORKTABLE,
+                                                iColumnCount, sSheetTitle)
+            self.WriteFirst3ColumnsAndPageLayout(ws, self.dtLineSourceText, self.dtFootnotes,
+                                                sSheetTitle, sSelectStringRows, sSelectWorktable)
+
+            def set_cell(row, col, value, name=None, num_format=None, align_right=True):
+                c = ws.cell(row=row, column=col, value=value)
+                if name:
+                    wb.defined_names[name] = DefinedName(
+                        name=name, attr_text=f"'{sSheetTitle}'!${c.column_letter}${c.row}"
+                    )
+                if align_right:
+                    c.alignment = Alignment(horizontal="right")
+                if num_format:
+                    c.number_format = num_format
+                return c
+
+            def get_pi9(year_col_name):
+                df = self.dtPriceIndexes[self.dtPriceIndexes['index'] == 9]
+                return "" if df.empty else df.iloc[0][year_col_name]
+
+            iCurrentYear = int(self.current_year)
+            special_lines = {219, 224}
+
+            # WRITE HARD VALUES
+            for _, r in self.dtAValue[self.dtAValue["rpt_sheet"] == sSheetTitle].iterrows():
+                aLine = int(r["aline"])
+                if aLine in special_lines:
+                    continue
+
+                iProcessYear = int(r["year"])
+                iROW_COUNT = aLine - iLineNumberOffset
+                aCol = to_str(r.get("acolumn", r.get("acol", r.get("aColumn", ""))))  # tolerant
+                value = to_str(r["value"])
+
+                if iProcessYear == iCurrentYear:
+                    # AnnPeriod (C1)
+                    dd = self.dtDataDictionary[self.dtDataDictionary["line"] == f"{sNamedRangePrefix}{aLine}"]
+                    if not dd.empty:
+                        set_cell(iROW_COUNT, 5, dd.iloc[0]["annperiod"], f"{sNamedRangePrefix}{aLine}C1")
+                    # C2 price index (Index 9)
+                    set_cell(iROW_COUNT, 7, get_pi9("current_year"), f"{sNamedRangePrefix}{aLine}C2", "0.0000")
+                    # C3..C8 based on aColumn 3..8
+                    if aCol == "3":
+                        set_cell(iROW_COUNT, 9,  value, f"{sNamedRangePrefix}{aLine}C3", "#,##0")
+                    if aCol == "4":
+                        formula_prefix = "=A3L215C4+A3L216C4+" if iROW_COUNT == 25 else ""
+                        set_cell(iROW_COUNT, 11, f"{formula_prefix}{value}", f"{sNamedRangePrefix}{aLine}C4", "#,##0")
+                    if aCol == "5":
+                        formula_prefix = "=A3L215C5+A3L216C5+" if iROW_COUNT == 25 else ""
+                        set_cell(iROW_COUNT, 13, f"{formula_prefix}{value}", f"{sNamedRangePrefix}{aLine}C5", "#,##0")
+                    if aCol == "6":
+                        set_cell(iROW_COUNT, 15, value, f"{sNamedRangePrefix}{aLine}C6", "#,##0")
+                    if aCol == "7":
+                        formula_prefix = "=A3L215C7+A3L216C7+" if iROW_COUNT == 25 else ""
+                        set_cell(iROW_COUNT, 17, f"{formula_prefix}{value}", f"{sNamedRangePrefix}{aLine}C7", "#,##0")
+                    if aCol == "8":
+                        formula_prefix = "=A3L215C8+A3L216C8+" if iROW_COUNT == 25 else ""
+                        set_cell(iROW_COUNT, 19, f"{formula_prefix}{value}", f"{sNamedRangePrefix}{aLine}C8", "#,##0")
+
+                elif iProcessYear == iCurrentYear - 1:
+                    set_cell(iROW_COUNT, 21, get_pi9("current_year_minus_1"), f"{sNamedRangePrefix}{aLine}C9", "0.0000")
+                    if aCol == "3":
+                        set_cell(iROW_COUNT, 23, value, f"{sNamedRangePrefix}{aLine}C10", "#,##0")
+                    if aCol == "4":
+                        prefix = "=A3L215C11+A3L216C11+" if iROW_COUNT == 25 else ""
+                        set_cell(iROW_COUNT, 25, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C11", "#,##0")
+                    if aCol == "5":
+                        prefix = "=A3L215C12+A3L216C12+" if iROW_COUNT == 25 else ""
+                        set_cell(iROW_COUNT, 27, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C12", "#,##0")
+                    if aCol == "6":
+                        set_cell(iROW_COUNT, 29, value, f"{sNamedRangePrefix}{aLine}C13", "#,##0")
+                    if aCol == "7":
+                        prefix = "=A3L215C14+A3L216C14+" if iROW_COUNT == 25 else ""
+                        set_cell(iROW_COUNT, 31, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C14", "#,##0")
+                    if aCol == "8":
+                        prefix = "=A3L215C15+A3L216C15+" if iROW_COUNT == 25 else ""
+                        set_cell(iROW_COUNT, 33, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C15", "#,##0")
+
+                elif iProcessYear == iCurrentYear - 2:
+                    set_cell(iROW_COUNT, 35, get_pi9("current_year_minus_2"), f"{sNamedRangePrefix}{aLine}C16", "0.0000")
+                    if aCol == "3":
+                        set_cell(iROW_COUNT, 37, value, f"{sNamedRangePrefix}{aLine}C17", "#,##0")
+                    if aCol == "4":
+                        prefix = "=A3L215C18+A3L216C18+" if iROW_COUNT == 25 else ""
+                        set_cell(iROW_COUNT, 39, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C18", "#,##0")
+                    if aCol == "5":
+                        prefix = "=A3L215C19+A3L216C19+" if iROW_COUNT == 25 else ""
+                        set_cell(iROW_COUNT, 41, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C19", "#,##0")
+                    if aCol == "6":
+                        set_cell(iROW_COUNT, 43, value, f"{sNamedRangePrefix}{aLine}C20", "#,##0")
+                    if aCol == "7":
+                        prefix = "=A3L215C21+A3L216C21+" if iROW_COUNT == 25 else ""
+                        set_cell(iROW_COUNT, 45, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C21", "#,##0")
+                    if aCol == "8":
+                        prefix = "=A3L215C22+A3L216C22+" if iROW_COUNT == 25 else ""
+                        set_cell(iROW_COUNT, 47, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C22", "#,##0")
+
+                elif iProcessYear == iCurrentYear - 3:
+                    set_cell(iROW_COUNT, 49, get_pi9("current_year_minus_3"), f"{sNamedRangePrefix}{aLine}C23", "0.0000")
+                    if aCol == "3":
+                        set_cell(iROW_COUNT, 51, value, f"{sNamedRangePrefix}{aLine}C24", "#,##0")
+                    if aCol == "4":
+                        prefix = "=A3L215C25+A3L216C25+" if iROW_COUNT == 25 else ""
+                        set_cell(iROW_COUNT, 53, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C25", "#,##0")
+                    if aCol == "5":
+                        prefix = "=A3L215C26+A3L216C26+" if iROW_COUNT == 25 else ""
+                        set_cell(iROW_COUNT, 55, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C26", "#,##0")
+                    if aCol == "6":
+                        set_cell(iROW_COUNT, 57, value, f"{sNamedRangePrefix}{aLine}C27", "#,##0")
+                    if aCol == "7":
+                        prefix = "=A3L215C28+A3L216C28+" if iROW_COUNT == 25 else ""
+                        set_cell(iROW_COUNT, 59, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C28", "#,##0")
+                    if aCol == "8":
+                        prefix = "=A3L215C29+A3L216C29+" if iROW_COUNT == 25 else ""
+                        set_cell(iROW_COUNT, 61, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C29", "#,##0")
+
+                elif iProcessYear == iCurrentYear - 4:
+                    set_cell(iROW_COUNT, 63, get_pi9("current_year_minus_4"), f"{sNamedRangePrefix}{aLine}C30", "0.0000")
+                    if aCol == "3":
+                        set_cell(iROW_COUNT, 65, value, f"{sNamedRangePrefix}{aLine}C31", "#,##0")
+                    if aCol == "4":
+                        prefix = "=A3L215C32+A3L216C32+" if iROW_COUNT == 25 else ""
+                        set_cell(iROW_COUNT, 67, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C32", "#,##0")
+                    if aCol == "5":
+                        prefix = "=A3L215C33+A3L216C33+" if iROW_COUNT == 25 else ""
+                        set_cell(iROW_COUNT, 69, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C33", "#,##0")
+                    if aCol == "6":
+                        set_cell(iROW_COUNT, 71, value, f"{sNamedRangePrefix}{aLine}C34", "#,##0")
+                    if aCol == "7":
+                        prefix = "=A3L215C35+A3L216C35+" if iROW_COUNT == 25 else ""
+                        set_cell(iROW_COUNT, 73, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C35", "#,##0")
+                    if aCol == "8":
+                        prefix = "=A3L215C36+A3L216C36+" if iROW_COUNT == 25 else ""
+                        set_cell(iROW_COUNT, 75, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C36", "#,##0")
+
+            # SOURCES
+            for _, dr in self.dtLineSourceText[self.dtLineSourceText["rpt_sheet"] == sSheetTitle].iterrows():
+                line = int(dr["line"])
+                iLine = line - iLineNumberOffset
+
+                # C1..C43 -> cols 4..88 (even)
+                for idx, col in enumerate(range(4, 89, 2), start=1):
+                    key = f"c{idx}"
+                    ws.cell(row=iLine, column=col, value=apostrophe(self.scrub_year(to_str(dr.get(key, "")), iCurrentYear)))
+
+                if line in special_lines:
+                    # Many NULLs + scrubbed numbers pattern
+                    def put(col, cnum, kind):
+                        if kind == "NULL":
+                            set_cell(iLine, col, "=NULL_VALUE", f"{sNamedRangePrefix}{line}{cnum}")
+                        else:
+                            set_cell(iLine, col, self.scrub_year(to_str(dr[cnum.lower()]), iCurrentYear),
+                                    f"{sNamedRangePrefix}{line}{cnum}", "#,##0")
+
+                    put(5,  "C1",  "NULL"); put(7,  "C2",  "NULL")
+                    put(9,  "C3",  "VAL");  put(11, "C4",  "VAL")
+                    put(13, "C5",  "VAL");  put(15, "C6",  "VAL")
+                    put(17, "C7",  "VAL");  put(19, "C8",  "VAL")
+                    put(21, "C9",  "NULL"); put(23, "C10", "VAL")
+                    put(25, "C11", "VAL");  put(27, "C12", "VAL")
+                    put(29, "C13", "VAL");  put(31, "C14", "VAL")
+                    put(33, "C15", "VAL");  put(35, "C16", "NULL")
+                    put(37, "C17", "VAL");  put(39, "C18", "VAL")
+                    put(41, "C19", "VAL");  put(43, "C20", "VAL")
+                    put(45, "C21", "VAL");  put(47, "C22", "VAL")
+                    put(49, "C23", "NULL"); put(51, "C24", "VAL")
+                    put(53, "C25", "VAL");  put(55, "C26", "VAL")
+                    put(57, "C27", "VAL");  put(59, "C28", "VAL")
+                    put(61, "C29", "VAL");  put(63, "C30", "NULL")
+                    put(65, "C31", "VAL");  put(67, "C32", "VAL")
+                    put(69, "C33", "VAL");  put(71, "C34", "VAL")
+                    put(73, "C35", "VAL");  put(75, "C36", "VAL")
+                    put(77, "C37", "VAL");  put(79, "C38", "VAL")
+                    put(81, "C39", "VAL");  put(83, "C40", "VAL")
+                    put(85, "C41", "VAL");  put(87, "C42", "VAL")
+                    put(89, "C43", "VAL")
+                else:
+                    # Create sources for C37..C42 into columns (76/77), (78/79), ..., (86/87)
+                    for k, base_col in zip(range(3, 9), [76, 78, 80, 82, 84, 86]):
+                        sSource = self.get_source_for_a3p2_summary_column(line, iLine, k)
+                        ws.cell(row=iLine, column=base_col, value=apostrophe(sSource) if len(sSource) > 0 else "")
+                        set_cell(iLine, base_col + 1, sSource, f"{sNamedRangePrefix}{line}C{36 + k}", "#,##0")
+
+                    # C43 is just scrubbed text -> numeric cell with format
+                    set_cell(iLine, 89, self.scrub_year(to_str(dr.get("c43", "")), iCurrentYear),
+                            f"{sNamedRangePrefix}{line}C43", "#,##0")
+
+            self.format_all_cells(ws)
+            print(f"{sSheetTitle} completed")
+        except Exception as ex:
+            print(f"Error in {sSheetTitle}: {ex}")
+            import traceback; print(traceback.format_exc())
+
+
+    # --------------------------
+    # A3P3
+    # --------------------------
+    def A3P3_worksheet(self, wb):
+        try:
+            sTitle_WORKTABLE = "WORKTABLE A3 PART 3"
+            iColumnCount = 27
+            iWorkTableColumnCount = 12
+            sSheetTitle = "A3P3"
+            iLineNumberOffset = 293
+            sNamedRangePrefix = "A3L"
+
+            print(f"Processing {sSheetTitle}")
+            ws = wb.create_sheet(title=sSheetTitle)
+            ws.freeze_panes = ws['D8']
+
+            part_str = sSheetTitle[sSheetTitle.find('P')+1:]
+            part_only = part_str[:2] if len(part_str) >= 2 and part_str[:2].isdigit() else part_str[:1]
+            sSelectWorktable = f"Worktable = '{sSheetTitle[:2]}' And Part = '{part_only}'"
+            sSelectStringRows = f"Rpt_sheet = '{sSheetTitle}'"
+
+            self.write_titles_and_column_headers(ws, self.dtTitles, sSelectWorktable,
+                                                self.sTitle_RR_YEAR, sTitle_WORKTABLE,
+                                                iColumnCount, sSheetTitle)
+            self.WriteFirst3ColumnsAndPageLayout(ws, self.dtLineSourceText, self.dtFootnotes,
+                                                sSheetTitle, sSelectStringRows, sSelectWorktable)
+
+            def set_cell(row, col, value, name=None, num_format=None, align_right=True):
+                c = ws.cell(row=row, column=col, value=value)
+                if name:
+                    wb.defined_names[name] = DefinedName(
+                        name=name, attr_text=f"'{sSheetTitle}'!${c.column_letter}${c.row}"
+                    )
+                if align_right:
+                    c.alignment = Alignment(horizontal="right")
+                if num_format:
+                    c.number_format = num_format
+                return c
+
+            def pi_from_ref(worktable, line, column_text, year_col):
+                ref = self.dtPriceIndexReferences.query("worktable == @worktable and line == @line and column == @column_text")
+                if ref.empty:
+                    return ""
+                idx = int(ref.iloc[0]["index"])
+                row = self.dtPriceIndexes[self.dtPriceIndexes["index"] == idx]
+                return "" if row.empty else row.iloc[0][year_col]
+
+            iCurrentYear = int(self.current_year)
+
+            # eligible lines are NOT in these sets/ranges:
+            def is_excluded_for_values(aline:int) -> bool:
+                return (305 <= aline <= 307) or (aline == 326) or (aline >= 342)
+
+            # WRITE HARD VALUES
+            for _, r in self.dtAValue[self.dtAValue["rpt_sheet"] == sSheetTitle].iterrows():
+                aLine = int(r["aline"])
+                if is_excluded_for_values(aLine):
+                    continue
+
+                iProcessYear = int(r["year"])
+                iROW_COUNT = aLine - iLineNumberOffset
+                dd = self.dtDataDictionary[self.dtDataDictionary["line"] == f"{sNamedRangePrefix}{aLine}"]
+
+                if iProcessYear == iCurrentYear:
+                    if not dd.empty:
+                        set_cell(iROW_COUNT, 5, dd.iloc[0]["annperiod"], f"{sNamedRangePrefix}{aLine}C1")
+                    set_cell(iROW_COUNT, 7, to_str(r["value"]), f"{sNamedRangePrefix}{aLine}C2", "#,##0")
+                    set_cell(iROW_COUNT, 9,  pi_from_ref("A3P3", str(aLine), "3", "current_year"), f"{sNamedRangePrefix}{aLine}C3", "0.0000")
+
+                elif iProcessYear == iCurrentYear - 1:
+                    set_cell(iROW_COUNT, 11, to_str(r["value"]), f"{sNamedRangePrefix}{aLine}C4", "#,##0")
+                    set_cell(iROW_COUNT, 13, pi_from_ref("A3P3", str(aLine), "5", "current_year_minus_1"), f"{sNamedRangePrefix}{aLine}C5", "0.0000")
+
+                elif iProcessYear == iCurrentYear - 2:
+                    set_cell(iROW_COUNT, 15, to_str(r["value"]), f"{sNamedRangePrefix}{aLine}C6", "#,##0")
+                    set_cell(iROW_COUNT, 17, pi_from_ref("A3P3", str(aLine), "7", "current_year_minus_2"), f"{sNamedRangePrefix}{aLine}C7", "0.0000")
+
+                elif iProcessYear == iCurrentYear - 3:
+                    set_cell(iROW_COUNT, 19, to_str(r["value"]), f"{sNamedRangePrefix}{aLine}C8", "#,##0")
+                    set_cell(iROW_COUNT, 21, pi_from_ref("A3P3", str(aLine), "9", "current_year_minus_3"), f"{sNamedRangePrefix}{aLine}C9", "0.0000")
+
+                elif iProcessYear == iCurrentYear - 4:
+                    set_cell(iROW_COUNT, 23, to_str(r["value"]), f"{sNamedRangePrefix}{aLine}C10", "#,##0")
+                    set_cell(iROW_COUNT, 25, pi_from_ref("A3P3", str(aLine), "11", "current_year_minus_4"), f"{sNamedRangePrefix}{aLine}C11", "0.0000")
+
+            # SOURCES
+            for _, dr in self.dtLineSourceText[self.dtLineSourceText["rpt_sheet"] == sSheetTitle].iterrows():
+                line = int(dr["line"])
+                iLine = line - iLineNumberOffset
+
+                # Sources C1..C12 -> cols 4..26
+                for idx, col in enumerate(range(4, 27, 2), start=1):
+                    ws.cell(row=iLine, column=col,
+                            value=apostrophe(self.scrub_year(to_str(dr.get(f"c{idx}", "")), iCurrentYear)))
+
+                if is_excluded_for_values(line):
+                    # nulls in price-index columns with numeric fills in value columns
+                    def put(col, cnum, is_null):
+                        if is_null:
+                            set_cell(iLine, col, "=NULL_VALUE", f"{sNamedRangePrefix}{line}{cnum}")
+                        else:
+                            set_cell(iLine, col, self.scrub_year(to_str(dr[cnum.lower()]), iCurrentYear),
+                                    f"{sNamedRangePrefix}{line}{cnum}", "#,##0")
+
+                    put(5, "C1", True)
+                    put(7, "C2", False)
+                    put(9, "C3", True)
+                    put(11, "C4", False)
+                    put(13, "C5", True)
+                    put(15, "C6", False)
+                    put(17, "C7", True)
+                    put(19, "C8", False)
+                    put(21, "C9", True)
+                    put(23, "C10", False)
+                    put(25, "C11", True)
+                    put(27, "C12", False)
+                else:
+                    # Create source for C12
+                    sSource = self.get_source_for_a3p3to_p8_summary_column(line, iLine)
+                    ws.cell(row=iLine, column=26, value=apostrophe(sSource) if len(sSource) > 0 else "")
+                    set_cell(iLine, 27, sSource, f"{sNamedRangePrefix}{line}C12", "#,##0")
+
+            self.format_all_cells(ws)
+            print(f"{sSheetTitle} completed")
+        except Exception as ex:
+            print(f"Error in {sSheetTitle}: {ex}")
+            import traceback; print(traceback.format_exc())
+
+
+    # --------------------------
+    # A3P4
+    # --------------------------
+    def A3P4_worksheet(self, wb):
+        try:
+            sTitle_WORKTABLE = "WORKTABLE A3 PART 4"
+            iColumnCount = 27
+            iWorkTableColumnCount = 12
+            sSheetTitle = "A3P4"
+            iLineNumberOffset = 393
+            sNamedRangePrefix = "A3L"
+
+            print(f"Processing {sSheetTitle}")
+            ws = wb.create_sheet(title=sSheetTitle)
+            ws.freeze_panes = ws['D8']
+
+            part_str = sSheetTitle[sSheetTitle.find('P')+1:]
+            part_only = part_str[:2] if len(part_str) >= 2 and part_str[:2].isdigit() else part_str[:1]
+            sSelectWorktable = f"Worktable = '{sSheetTitle[:2]}' And Part = '{part_only}'"
+            sSelectStringRows = f"Rpt_sheet = '{sSheetTitle}'"
+
+            self.write_titles_and_column_headers(ws, self.dtTitles, sSelectWorktable,
+                                                self.sTitle_RR_YEAR, sTitle_WORKTABLE,
+                                                iColumnCount, sSheetTitle)
+            self.WriteFirst3ColumnsAndPageLayout(ws, self.dtLineSourceText, self.dtFootnotes,
+                                                sSheetTitle, sSelectStringRows, sSelectWorktable)
+
+            def set_cell(row, col, value, name=None, num_format=None, align_right=True):
+                c = ws.cell(row=row, column=col, value=value)
+                if name:
+                    wb.defined_names[name] = DefinedName(
+                        name=name, attr_text=f"'{sSheetTitle}'!${c.column_letter}${c.row}"
+                    )
+                if align_right:
+                    c.alignment = Alignment(horizontal="right")
+                if num_format:
+                    c.number_format = num_format
+                return c
+
+            def pi_from_ref(worktable, line, column_text, year_col):
+                ref = self.dtPriceIndexReferences.query("worktable == @worktable and line == @line and column == @column_text")
+                if ref.empty:
+                    return ""
+                idx = int(ref.iloc[0]["index"])
+                row = self.dtPriceIndexes[self.dtPriceIndexes["index"] == idx]
+                return "" if row.empty else row.iloc[0][year_col]
+
+            iCurrentYear = int(self.current_year)
+
+            def is_excluded_for_values(aline:int) -> bool:
+                return (405 <= aline <= 407) or (aline == 426) or (aline >= 442)
+
+            # WRITE HARD VALUES
+            for _, r in self.dtAValue[self.dtAValue["rpt_sheet"] == sSheetTitle].iterrows():
+                aLine = int(r["aline"])
+                if is_excluded_for_values(aLine):
+                    continue
+
+                iProcessYear = int(r["year"])
+                iROW_COUNT = aLine - iLineNumberOffset
+                dd = self.dtDataDictionary[self.dtDataDictionary["line"] == f"{sNamedRangePrefix}{aLine}"]
+
+                if iProcessYear == iCurrentYear:
+                    if not dd.empty:
+                        set_cell(iROW_COUNT, 5, dd.iloc[0]["annperiod"], f"{sNamedRangePrefix}{aLine}C1")
+                    set_cell(iROW_COUNT, 7, to_str(r["value"]), f"{sNamedRangePrefix}{aLine}C2", "#,##0")
+                    set_cell(iROW_COUNT, 9,  pi_from_ref("A3P4", str(aLine), "3", "current_year"), f"{sNamedRangePrefix}{aLine}C3", "0.0000")
+
+                elif iProcessYear == iCurrentYear - 1:
+                    set_cell(iROW_COUNT, 11, to_str(r["value"]), f"{sNamedRangePrefix}{aLine}C4", "#,##0")
+                    set_cell(iROW_COUNT, 13, pi_from_ref("A3P4", str(aLine), "5", "current_year_minus_1"), f"{sNamedRangePrefix}{aLine}C5", "0.0000")
+
+                elif iProcessYear == iCurrentYear - 2:
+                    set_cell(iROW_COUNT, 15, to_str(r["value"]), f"{sNamedRangePrefix}{aLine}C6", "#,##0")
+                    set_cell(iROW_COUNT, 17, pi_from_ref("A3P4", str(aLine), "7", "current_year_minus_2"), f"{sNamedRangePrefix}{aLine}C7", "0.0000")
+
+                elif iProcessYear == iCurrentYear - 3:
+                    set_cell(iROW_COUNT, 19, to_str(r["value"]), f"{sNamedRangePrefix}{aLine}C8", "#,##0")
+                    set_cell(iROW_COUNT, 21, pi_from_ref("A3P4", str(aLine), "9", "current_year_minus_3"), f"{sNamedRangePrefix}{aLine}C9", "0.0000")
+
+                elif iProcessYear == iCurrentYear - 4:
+                    set_cell(iROW_COUNT, 23, to_str(r["value"]), f"{sNamedRangePrefix}{aLine}C10", "#,##0")
+                    set_cell(iROW_COUNT, 25, pi_from_ref("A3P4", str(aLine), "11", "current_year_minus_4"), f"{sNamedRangePrefix}{aLine}C11", "0.0000")
+
+            # SOURCES
+            for _, dr in self.dtLineSourceText[self.dtLineSourceText["rpt_sheet"] == sSheetTitle].iterrows():
+                line = int(dr["line"])
+                iLine = line - iLineNumberOffset
+
+                for idx, col in enumerate(range(4, 27, 2), start=1):
+                    ws.cell(row=iLine, column=col,
+                            value=apostrophe(self.scrub_year(to_str(dr.get(f"c{idx}", "")), iCurrentYear)))
+
+                if is_excluded_for_values(line):
+                    def put(col, cnum, is_null):
+                        if is_null:
+                            set_cell(iLine, col, "=NULL_VALUE", f"{sNamedRangePrefix}{line}{cnum}")
+                        else:
+                            set_cell(iLine, col, self.scrub_year(to_str(dr[cnum.lower()]), iCurrentYear),
+                                    f"{sNamedRangePrefix}{line}{cnum}", "#,##0")
+
+                    put(5, "C1", True)
+                    put(7, "C2", False)
+                    put(9, "C3", True)
+                    put(11, "C4", False)
+                    put(13, "C5", True)
+                    put(15, "C6", False)
+                    put(17, "C7", True)
+                    put(19, "C8", False)
+                    put(21, "C9", True)
+                    put(23, "C10", False)
+                    put(25, "C11", True)
+                    put(27, "C12", False)
+                else:
+                    sSource = self.get_source_for_a3p3to_p8_summary_column(line, iLine)
+                    ws.cell(row=iLine, column=26, value=apostrophe(sSource) if len(sSource) > 0 else "")
+                    set_cell(iLine, 27, sSource, f"{sNamedRangePrefix}{line}C12", "#,##0")
+
+            self.format_all_cells(ws)
+            print(f"{sSheetTitle} completed")
+        except Exception as ex:
+            print(f"Error in {sSheetTitle}: {ex}")
+            import traceback; print(traceback.format_exc())
 
 if __name__ == "__main__":
     
