@@ -269,26 +269,29 @@ class CreateReports:
         # Configure workbook for formula calculation
         
         self.build_index_worksheet(wb)
+        
         self.A1P1_worksheet(wb)
         self.A1P2A_worksheet(wb)
         self.A1P2B_worksheet(wb)
-        self.A1P2C_worksheet(wb)
+        self.A1P2C_worksheet(wb)        
         self.A1P3A_worksheet(wb)
+        
         self.A1P3B_worksheet(wb)
         self.A1P4_worksheet(wb)
         self.A1P5A_worksheet(wb)
-
-        self.A1P5B_worksheet(wb)
+        self.A1P5B_worksheet(wb)        
         self.A1P6_worksheet(wb)
+        
         self.A1P7_worksheet(wb)
         self.A1P8_worksheet(wb)
         self.A1P9_worksheet(wb)
-        self.A2P1_worksheet(wb)
+        self.A2P1_worksheet(wb)        
         self.A2P2_worksheet(wb)
+        
         self.A2P3_worksheet(wb)
         self.A2P4_worksheet(wb)
         self.A3P1_worksheet(wb)
-        self.A3P2_worksheet(wb)
+        self.A3P2_worksheet(wb)        
         self.A3P3_worksheet(wb)
         
 
@@ -2723,43 +2726,62 @@ class CreateReports:
             import traceback
             print(traceback.format_exc())
 
-    def get_source_for_a3p1_summary_column(self, line, iLine):
-        """
-        VB: GetSourceForA3P1SummaryColumn(line, iLine)
-        Purpose: return the source string for the C12 (last) column on A3P1 rows
-        when the row is NOT one of the special derived rows.
-        Implementation: pull C12 from dtLineSourceText for the given line and scrub it.
-        """
+    def get_source_for_a3p1_summary_column(self, ws, line_number, cell_line_number):
+        sReturn = ""
+        
+        sline_number = str(line_number)
+        oCell = ws.cell(row=cell_line_number, column=5)
         try:
-            row = self.dtLineSourceText[self.dtLineSourceText["line"].astype(str) == str(line)]
-            if row.empty:
-                return ""
-            s = to_str(row.iloc[0].get("c12", ""))
-            return self.scrub_year(s, int(self.current_year))
-        except Exception:
-            return ""
+            iPeriod = int(oCell.value) if oCell.value is not None else 0
+        except (ValueError, TypeError):
+            iPeriod = 0
+
+        if iPeriod > 0:
+            sReturn = "=SUM(PRODUCT(A3L" + sline_number + "C2,A3L" + sline_number + "C3)"
+
+            if iPeriod > 1:
+                sReturn = sReturn + ",PRODUCT(A3L" + sline_number + "C4,A3L" + sline_number + "C5)"
+            if iPeriod > 2:
+                sReturn = sReturn + ",PRODUCT(A3L" + sline_number + "C6,A3L" + sline_number + "C7)"
+            if iPeriod > 3:
+                sReturn = sReturn + ",PRODUCT(A3L" + sline_number + "C8,A3L" + sline_number + "C9)"
+            if iPeriod > 4:
+                sReturn = sReturn + ",PRODUCT(A3L" + sline_number + "C10,A3L" + sline_number + "C11)"
+
+            sReturn = sReturn + ")/A3L" + sline_number + "C1"
+        else:
+            sReturn = ""
+
+        return sReturn
 
 
-    def get_source_for_a3p2_summary_column(self, line, iLine, k):
-        """
-        VB: GetSourceForA3P2SummaryColumn(line, iLine, k)
-        Purpose: return the source string for the summary columns C37..C42 on A3P2.
-                In VB they called this with k = 3..8 and then wrote to C37..C42.
-        Mapping: C37..C42 correspond to source keys C(34+k) => c37..c42.
-                (k=3 -> c37, k=4 -> c38, ..., k=8 -> c42)
-        Implementation: pull the appropriate C# from dtLineSourceText and scrub it.
-        """
+    def get_source_for_a3p2_summary_column(self, ws, line_number, cell_line_number, column_number):
+        sReturn = ""
+        
+        sline_number = str(line_number)
+        oCell = ws.cell(row=cell_line_number, column=5)
         try:
-            # Map k (3..8) -> column key name in dtLineSourceText: c37..c42
-            col_num = 34 + int(k)  # 34+3=37 .. 34+8=42
-            key = f"c{col_num}"
-            row = self.dtLineSourceText[self.dtLineSourceText["line"].astype(str) == str(line)]
-            if row.empty:
-                return ""
-            s = to_str(row.iloc[0].get(key, ""))
-            return self.scrub_year(s, int(self.current_year))
-        except Exception:
-            return ""
+            iPeriod = int(oCell.value) if oCell.value is not None else 0
+        except (ValueError, TypeError):
+            iPeriod = 0
+
+        if iPeriod > 0:
+            sReturn = "=SUM(PRODUCT(A3L" + sline_number + "C2,A3L" + sline_number + "C" + str(column_number) + ")"
+
+            if iPeriod > 1:
+                sReturn = sReturn + ",PRODUCT(A3L" + sline_number + "C9,A3L" + sline_number + "C" + str(column_number + 7) + ")"
+            if iPeriod > 2:
+                sReturn = sReturn + ",PRODUCT(A3L" + sline_number + "C16,A3L" + sline_number + "C" + str(column_number + 14) + ")"
+            if iPeriod > 3:
+                sReturn = sReturn + ",PRODUCT(A3L" + sline_number + "C23,A3L" + sline_number + "C" + str(column_number + 21) + ")"
+            if iPeriod > 4:
+                sReturn = sReturn + ",PRODUCT(A3L" + sline_number + "C30,A3L" + sline_number + "C" + str(column_number + 28) + ")"
+
+            sReturn = sReturn + ")/A3L" + sline_number + "C1"
+        else:
+            sReturn = ""
+
+        return sReturn
 
 
     def get_source_for_a3p3to_p8_summary_column(self, line, iLine):
@@ -2902,7 +2924,7 @@ class CreateReports:
                                     f"{sNamedRangePrefix}{line}{cnum}", "#,##0")
                 else:
                     # Create source for C12
-                    sSource = self.get_source_for_a3p1_summary_column(line, iLine)
+                    sSource = self.get_source_for_a3p1_summary_column(ws, line, iLine)
                     ws.cell(row=iLine, column=26, value=apostrophe(sSource) if len(sSource) > 0 else "")
                     set_cell(iLine, 27, sSource, f"{sNamedRangePrefix}{line}C12", "#,##0")
 
@@ -3115,7 +3137,7 @@ class CreateReports:
                 else:
                     # Create sources for C37..C42 into columns (76/77), (78/79), ..., (86/87)
                     for k, base_col in zip(range(3, 9), [76, 78, 80, 82, 84, 86]):
-                        sSource = self.get_source_for_a3p2_summary_column(line, iLine, k)
+                        sSource = self.get_source_for_a3p2_summary_column(ws, line, iLine, k)
                         ws.cell(row=iLine, column=base_col, value=apostrophe(sSource) if len(sSource) > 0 else "")
                         set_cell(iLine, base_col + 1, sSource, f"{sNamedRangePrefix}{line}C{36 + k}", "#,##0")
 
