@@ -268,7 +268,7 @@ class CreateReports:
         
         # Configure workbook for formula calculation
         
-        self.build_index_worksheet(wb)
+        self.INDEX_worksheet(wb)
         
         self.A1P1_worksheet(wb)
         self.A1P2A_worksheet(wb)
@@ -301,7 +301,7 @@ class CreateReports:
         print(f"Workbook {workbookname} saved at: {full_path}")
 
 
-    def build_index_worksheet(self, wb: Workbook):
+    def INDEX_worksheet(self, wb: Workbook):
         """
         Builds the 'INDEX' worksheet in the provided workbook, sets titles, and populates user input values with formatting.
         Args:

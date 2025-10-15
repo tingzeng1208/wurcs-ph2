@@ -295,24 +295,5 @@ if __name__ == "__main__":
         print(f"Target workbook not found: {target_wb2}")
         
     compare_two_workbooks(source_wb1, target_wb2, case_sensitive=False)
-
-    # Example 2: Compare with detailed output
-    # result = compare_worksheets_detailed(
-    #     workbook1_path="path/to/workbook1.xlsx",
-    #     worksheet1_name="INDEX",
-    #     workbook2_path="path/to/workbook2.xlsx", 
-    #     worksheet2_name="INDEX",
-    #     output_file="comparison_report.txt",
-    #     max_row=100,
-    #     max_col=10,
-    #     case_sensitive=False
-    # )
-    
-    # Example 3: Compare multiple worksheet pairs
-    # comparisons = [
-    #     ("wb1.xlsx", "INDEX", "wb2.xlsx", "INDEX"),
-    #     ("wb1.xlsx", "A1P1", "wb2.xlsx", "A1P1"),
-    # ]
-    # results = compare_multiple_worksheets(comparisons, case_sensitive=False)
     
     print("Functions defined. Use compare_worksheets(), compare_worksheets_detailed(), or compare_multiple_worksheets()")
