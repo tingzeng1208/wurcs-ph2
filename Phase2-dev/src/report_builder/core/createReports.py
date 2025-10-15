@@ -107,7 +107,7 @@ class CreateReports:
         print(f"Workbook {workbookname} created at: {full_path}")
     
         sheets = all_names()
-        sheets = ["INDEX_worksheet", "A1P1_worksheet", "A1P2A_worksheet", "A1P2B_worksheet"]
+        sheets = ["INDEX_worksheet", "A1P1_worksheet", "A1P2A_worksheet", "A1P2B_worksheet", "A1P2C_worksheet", "A1P3A_worksheet"]
         print("Available sheets to generate:", sheets)
 
         for name in sheets:
