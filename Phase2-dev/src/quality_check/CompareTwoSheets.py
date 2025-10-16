@@ -2,6 +2,8 @@ import openpyxl
 from openpyxl import load_workbook
 from typing import Optional, Tuple, List, Dict, Any
 import os
+import sys
+import argparse
 from datetime import datetime
 
 
@@ -196,23 +198,44 @@ def compare_worksheets(workbook1_path: str, worksheet1_name: str,
 
 def compare_two_workbooks(workbook1_path: str, 
                            workbook2_path: str, 
-                           case_sensitive: bool = False):
+                           case_sensitive: bool = False,
+                           sheet_name: str = None):
     """
     Compare two Excel workbooks and return the comparison results.
+    
+    Args:
+        workbook1_path (str): Path to the first workbook
+        workbook2_path (str): Path to the second workbook  
+        case_sensitive (bool): Whether comparison should be case sensitive
+        sheet_name (str, optional): If provided, only compare this specific sheet
     """
     
-    reports_dir = os.path.join(os.path.dirname(__file__), "../..", "reports")
-    source_wb1 = os.path.abspath(os.path.join(reports_dir, "CN2023.xlsx"))
-    target_wb2 = os.path.abspath(os.path.join(reports_dir, "CN-2023_report.xlsx"))
+    # Use provided workbook paths instead of hardcoded ones
+    source_wb1 = os.path.abspath(workbook1_path)
+    target_wb2 = os.path.abspath(workbook2_path)
     
-    wb2 = load_workbook(os.path.abspath(os.path.join(reports_dir, "CN-2023_report.xlsx")), data_only=True)
+    # Load the target workbook to get sheet names
+    try:
+        wb2 = load_workbook(target_wb2, data_only=True)
+    except Exception as e:
+        print(f"Error loading target workbook: {e}")
+        return []
 
-    # Remove ComparisonResult.txt if it exists
-    comparison_result_path = os.path.join(reports_dir, "ComparisonResult.txt")
+    # Remove ComparisonResult.txt if it exists (in same directory as workbook1)
+    workbook1_dir = os.path.dirname(source_wb1)
+    comparison_result_path = os.path.join(workbook1_dir, "ComparisonResult.txt")
     if os.path.exists(comparison_result_path):
         os.remove(comparison_result_path)
         
-    sheetnames = wb2.sheetnames
+    # Get sheet names to compare
+    if sheet_name:
+        # Only compare the specified sheet
+        sheetnames = [sheet_name]
+        print(f"Comparing only sheet: {sheet_name}")
+    else:
+        # Compare all sheets
+        sheetnames = wb2.sheetnames
+        print(f"Comparing all sheets: {sheetnames}")
 
     all_results = []
     total_cells = 0
@@ -223,12 +246,25 @@ def compare_two_workbooks(workbook1_path: str,
     for sheetname in sheetnames:
         print(f"\nComparing worksheet: {sheetname}")
         if os.path.exists(source_wb1) and os.path.exists(target_wb2):
+            # Check if the sheet exists in both workbooks
+            try:
+                wb1_check = load_workbook(source_wb1, data_only=True)
+                if sheetname not in wb1_check.sheetnames:
+                    print(f"Warning: Sheet '{sheetname}' not found in {source_wb1}")
+                    continue
+                if sheetname not in wb2.sheetnames:
+                    print(f"Warning: Sheet '{sheetname}' not found in {target_wb2}")
+                    continue
+            except Exception as e:
+                print(f"Error checking sheets: {e}")
+                continue
+                
             result = compare_worksheets(
                 workbook1_path=source_wb1,
                 worksheet1_name=sheetname, 
                 workbook2_path=target_wb2,
                 worksheet2_name=sheetname,
-                case_sensitive=False
+                case_sensitive=case_sensitive  # Use the parameter instead of hardcoded False
             )
             print(f"\nComparison completed. Success: {result.get('success', False)}")
             all_results.append(result)
@@ -245,7 +281,10 @@ def compare_two_workbooks(workbook1_path: str,
 
     # Print overall summary
     print("\n" + "="*80)
-    print("Overall Comparison Summary:")
+    if sheet_name:
+        print(f"Comparison Summary for Sheet '{sheet_name}':")
+    else:
+        print("Overall Comparison Summary:")
     for summary in sheet_summaries:
         print(summary)
     print(f"\nTotal sheets compared: {len(sheetnames)}")
@@ -262,7 +301,10 @@ def compare_two_workbooks(workbook1_path: str,
     try:
         with open(comparison_result_path, 'a', encoding='utf-8') as f:
             f.write("\n" + "="*80 + "\n")
-            f.write("Overall Comparison Summary:\n")
+            if sheet_name:
+                f.write(f"Comparison Summary for Sheet '{sheet_name}':\n")
+            else:
+                f.write("Overall Comparison Summary:\n")
             for summary in sheet_summaries:
                 f.write(summary + "\n")
             f.write(f"\nTotal sheets compared: {len(sheetnames)}")
@@ -280,20 +322,88 @@ def compare_two_workbooks(workbook1_path: str,
 
 # Example usage and test function
 if __name__ == "__main__":
+    # Set up argument parser
+    parser = argparse.ArgumentParser(
+        description="Excel Worksheet Comparison Tool",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python CompareTwoSheets.py                    # Compare default workbooks (all sheets)
+  python CompareTwoSheets.py A1P9               # Compare default workbooks (only A1P9 sheet)
+  python CompareTwoSheets.py --wb1 file1.xlsx --wb2 file2.xlsx    # Compare custom workbooks (all sheets)
+  python CompareTwoSheets.py A1P9 --wb1 file1.xlsx --wb2 file2.xlsx    # Compare custom workbooks (only A1P9 sheet)
+  uv run CompareTwoSheets.py                    # Compare default workbooks (all sheets)
+  uv run CompareTwoSheets.py A1P9               # Compare default workbooks (only A1P9 sheet)
+        """
+    )
+    parser.add_argument(
+        'sheet_name', 
+        nargs='?', 
+        default=None,
+        help='Optional sheet name to compare. If not provided, all sheets will be compared.'
+    )
+    parser.add_argument(
+        '--case-sensitive', 
+        action='store_true',
+        help='Enable case-sensitive comparison (default: False)'
+    )
+    parser.add_argument(
+        '--wb1', '--workbook1',
+        type=str,
+        help='Path to the first workbook to compare'
+    )
+    parser.add_argument(
+        '--wb2', '--workbook2', 
+        type=str,
+        help='Path to the second workbook to compare'
+    )
+    
+    # Parse arguments
+    args = parser.parse_args()
+    
+    # Determine workbook paths
+    if args.wb1 and args.wb2:
+        # Use custom workbook paths
+        source_wb1 = os.path.abspath(args.wb1)
+        target_wb2 = os.path.abspath(args.wb2)
+        print(f"Using custom workbooks:")
+        print(f"  Workbook 1: {source_wb1}")
+        print(f"  Workbook 2: {target_wb2}")
+    else:
+        # Use default workbook paths
+        reports_dir = os.path.join(os.path.dirname(__file__), "../..", "reports")
+        source_wb1 = os.path.abspath(os.path.join(reports_dir, "CN2023.xlsx"))
+        target_wb2 = os.path.abspath(os.path.join(reports_dir, "CN-2023_report.xlsx"))
+        print(f"Using default workbooks:")
+        print(f"  Workbook 1: {source_wb1}")
+        print(f"  Workbook 2: {target_wb2}")
+    
     # Example usage
-    print("Excel Worksheet Comparison Tool")
+    print("\nExcel Worksheet Comparison Tool")
     print("=" * 50)
-
-    reports_dir = os.path.join(os.path.dirname(__file__), "../..", "reports")
-    source_wb1 = os.path.abspath(os.path.join(reports_dir, "CN2023.xlsx"))
-    target_wb2 = os.path.abspath(os.path.join(reports_dir, "CN-2023_report.xlsx"))
+    
+    if args.sheet_name:
+        print(f"Comparing single sheet: {args.sheet_name}")
+    else:
+        print("Comparing all sheets")
+    
+    if args.case_sensitive:
+        print("Case-sensitive comparison enabled")
 
     # Check if files exist
     if not os.path.exists(source_wb1):
         print(f"Source workbook not found: {source_wb1}")
+        sys.exit(1)
     if not os.path.exists(target_wb2):
         print(f"Target workbook not found: {target_wb2}")
+        sys.exit(1)
         
-    compare_two_workbooks(source_wb1, target_wb2, case_sensitive=False)
+    # Run comparison with command line arguments
+    compare_two_workbooks(
+        source_wb1, 
+        target_wb2, 
+        case_sensitive=args.case_sensitive,
+        sheet_name=args.sheet_name
+    )
     
-    print("Functions defined. Use compare_worksheets(), compare_worksheets_detailed(), or compare_multiple_worksheets()")
+    print("\nComparison completed successfully!")

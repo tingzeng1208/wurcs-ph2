@@ -3,10 +3,17 @@ from openpyxl.styles import Font, Alignment, Border, Side
 from openpyxl.workbook.defined_name import DefinedName
 from report_builder.core.registry import register
 from report_builder.core.context import ReportContext
+from utils.utility import excel_cell_to_col_row, to_str, apostrophe
 
-def to_str(value):
-    """Helper function to convert value to string safely"""
-    return str(value) if value is not None else ""
+
+
+
+
+different_cells = "E8, F8, G8, H8, I8, J8, K8, L8, M8, E9, F9, G9, H9, I9, J9, K9, L9, M9"
+
+# Convert different_cells string to (col, row) pairs
+cell_refs = [cell.strip() for cell in different_cells.split(',')]
+identified_set_cells = {excel_cell_to_col_row(cell_ref) for cell_ref in cell_refs}
 
 @register("A1P9_worksheet")
 def A1P9_worksheet(ctx: ReportContext, wb: Workbook):
@@ -48,13 +55,14 @@ def A1P9_worksheet(ctx: ReportContext, wb: Workbook):
                 # Source column (4, 6, 8, ...)
                 source_col = 2 * i + 2
                 source_text = ctx.scrub_year(to_str(drSource.get(c_name, "")), iCurrentYear)
-                ws.cell(row=iLine, column=source_col, value=f"'{source_text}" if source_text.startswith(('=', '+')) else source_text)
+                source_text = f"'{source_text}" if source_text.startswith(('=', '+')) else source_text
+                set_cell(ws, iLine, source_col, source_text)
 
                 # Derived Value column (5, 7, 9, ...)
                 value_col = 2 * i + 3
                 value = drSource.get(c_name, "")
-                cell = ws.cell(row=iLine, column=value_col, value=value)
-                
+                cell = set_cell(ws, iLine, value_col, value)
+
                 # Conditional formatting
                 if 12 < iLine < 25:
                     cell.alignment = Alignment(horizontal="right")
@@ -85,3 +93,17 @@ def A1P9_worksheet(ctx: ReportContext, wb: Workbook):
         print(f"Error in {sSheetTitle}: {ex}")
         import traceback
         print(traceback.format_exc())
+        
+def set_cell(ws, row, col, value):
+
+    # if value is None or (isinstance(value, str) and value.strip() == ""):
+    #     value = ""
+    # if (col, row) in identified_set_cells:
+    #     print(f"Setting cell at Row: {row}, Column: {col} with value: {value}")
+    cell = ws.cell(row=row, column=col, value=value)
+    # cell.alignment = Alignment(horizontal="right")
+    # cell.number_format = "#######0"
+    
+    # if (col, row) in identified_set_cells:
+    #     print(f"Set cell at Row: {row}, Column: {col} with value: {cell.value}")
+    return cell

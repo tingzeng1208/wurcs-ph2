@@ -15,7 +15,7 @@ def A1P8_worksheet(ctx: ReportContext, wb: Workbook):
         sNamedRangePrefix = "A1L"
 
         dtaValueRegion_RR = ctx.variable_ctx.dtAValueRegion_RR
-        dtaValue0_RR = ctx.variable_ctx.dtAValue0_RR
+        dtaValue0_RR = ctx.dtAValue0_RR
         dtaValue = ctx.variable_ctx.dtAValue
         dtLineSourceText = ctx.dtLineSourceText
         iCurrentYear = int(ctx.current_year)

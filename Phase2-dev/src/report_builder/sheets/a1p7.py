@@ -14,7 +14,7 @@ def A1P7_worksheet(ctx: ReportContext, wb: Workbook):
         iLineNumberOffset = 553
         sNamedRangePrefix = "A1L"
 
-        dtCarTypeStatisticsPart3 = ctx.variable_ctx.dtCarTypeStatisticsPart3
+        dtCarTypeStatisticsPart3 = ctx.dtCarTypeStatisticsPart3
         dtLineSourceText = ctx.dtLineSourceText
         iCurrentYear = int(ctx.current_year)
 

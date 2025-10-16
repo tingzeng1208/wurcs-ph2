@@ -125,6 +125,9 @@ class ReportContext:
             if row and row[0].row > 5:
                 for cell in row:
                     cell.font = font 
+                    
+    def to_str(self, value):
+        return str(value)
         
     def scrub_year(self, s: str, current_year: int) -> str:
         s = s.replace("#Y#", str(current_year))
