@@ -39,3 +39,12 @@ def excel_cell_to_col_row(cell_ref):
         col_num = col_num * 26 + (ord(char) - ord('A') + 1)
     
     return (col_num, int(row_str))
+
+def scrub_year(s: str, current_year: int) -> str:
+        s = s.replace("#Y#", str(current_year))
+        s = s.replace("#Y-1#", str(current_year - 1))
+        s = s.replace("#Y-2#", str(current_year - 2))
+        s = s.replace("#Y-3#", str(current_year - 3))
+        s = s.replace("#Y-4#", str(current_year - 4))
+        s = s.replace("#Y-5#", str(current_year - 4))
+        return s

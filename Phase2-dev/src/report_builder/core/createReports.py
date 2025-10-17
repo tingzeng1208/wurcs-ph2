@@ -106,9 +106,20 @@ class CreateReports:
         wb, full_path = self.create_workbook(workbookname,self.s_output_folder)
         print(f"Workbook {workbookname} created at: {full_path}")
     
-        sheets = all_names()
+        # sheets = all_names()
+        # sheets = []
         sheets = ["INDEX_worksheet", "A1P1_worksheet", "A1P2A_worksheet", "A1P2B_worksheet", "A1P2C_worksheet", "A1P3A_worksheet", "A1P3B_worksheet", "A1P4_worksheet", "A1P5A_worksheet", "A1P5B_worksheet", "A1P6_worksheet", "A1P7_worksheet", "A1P8_worksheet", "A1P9_worksheet"]
-        # sheets.append("A2P1_worksheet")
+        sheets.append("A2P1_worksheet")
+        sheets.append("A2P2_worksheet")
+        sheets.append("A2P3_worksheet")
+        sheets.append("A2P4_worksheet")
+        sheets.append("A3P1_worksheet")
+        sheets.append("A3P2_worksheet")
+        # sheets.append("A3P2_worksheet")
+        # sheets.append("A3P3_worksheet")
+        # sheets.append("A3P4_worksheet")
+
+
         print("Available sheets to generate:", sheets)
 
         for name in sheets:

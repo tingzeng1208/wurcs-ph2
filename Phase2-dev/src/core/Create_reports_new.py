@@ -375,6 +375,9 @@ class CreateReports:
             return ws
 
         except Exception as ex:
+            print(f"Error in INDEX_worksheet: {ex}")
+            import traceback
+            print(traceback.format_exc())
             print(f"Error in build_index_worksheet: {ex}")
             return None
 
@@ -2940,6 +2943,7 @@ class CreateReports:
     # --------------------------
     def A3P2_worksheet(self, wb):
         try:
+            # BUILD THE WORKTABLE TITLE AND SET WORKTABLE VARS
             sTitle_WORKTABLE = "WORKTABLE A3 PART 2"
             iColumnCount = 89
             iWorkTableColumnCount = 43
@@ -2948,20 +2952,39 @@ class CreateReports:
             sNamedRangePrefix = "A3L"
 
             print(f"Processing {sSheetTitle}")
+
+            # SHEET + FREEZE (equiv. to select/split/freeze panes)
             ws = wb.create_sheet(title=sSheetTitle)
             ws.freeze_panes = ws['D8']
 
-            part_str = sSheetTitle[sSheetTitle.find('P')+1:]
-            part_only = part_str[:2] if len(part_str) >= 2 and part_str[:2].isdigit() else part_str[:1]
-            sSelectWorktable = f"Worktable = '{sSheetTitle[:2]}' And Part = '{part_only}'"
-            sSelectStringRows = f"Rpt_sheet = '{sSheetTitle}'"
+            # SELECT STRINGS (faithful to VB Substring/IndexOf logic)
+            try:
+                part_only = sSheetTitle[sSheetTitle.index('P') + 1 : sSheetTitle.index('P') + 3]
+            except Exception:
+                part_only = sSheetTitle[sSheetTitle.index('P') + 1 : sSheetTitle.index('P') + 2]
+            sSelectWorktable   = f"Worktable = '{sSheetTitle[:2]}' And Part = '{part_only}'"
+            sSelectStringRows  = f"Rpt_sheet = '{sSheetTitle}'"
 
-            self.write_titles_and_column_headers(ws, self.dtTitles, sSelectWorktable,
-                                                self.sTitle_RR_YEAR, sTitle_WORKTABLE,
-                                                iColumnCount, sSheetTitle)
-            self.WriteFirst3ColumnsAndPageLayout(ws, self.dtLineSourceText, self.dtFootnotes,
-                                                sSheetTitle, sSelectStringRows, sSelectWorktable)
+            # TITLES + FIRST 3 COLS
+            self.write_titles_and_column_headers(
+                ws, self.dtTitles, sSelectWorktable,
+                self.sTitle_RR_YEAR, sTitle_WORKTABLE,
+                iColumnCount, sSheetTitle
+            )
+            self.WriteFirst3ColumnsAndPageLayout(
+                ws, self.dtLineSourceText, self.dtFootnotes,
+                sSheetTitle, sSelectStringRows, sSelectWorktable
+            )
 
+            def can_convert_to_number(s):
+                """Check if string can be converted to a number"""
+                try:
+                    float(s)
+                    return True
+                except (ValueError, TypeError):
+                    return False
+                
+            # Helpers
             def set_cell(row, col, value, name=None, num_format=None, align_right=True):
                 c = ws.cell(row=row, column=col, value=value)
                 if name:
@@ -2971,185 +2994,201 @@ class CreateReports:
                 if align_right:
                     c.alignment = Alignment(horizontal="right")
                 if num_format:
-                    c.number_format = num_format
+                    if can_convert_to_number(value):
+                        c.number_format = num_format
+                        c.value = float(value)
+                    
                 return c
 
-            def get_pi9(year_col_name):
-                df = self.dtPriceIndexes[self.dtPriceIndexes['index'] == 9]
-                return "" if df.empty else df.iloc[0][year_col_name]
+            def get_pi(idx, year_col):
+                df = self.dtPriceIndexes[self.dtPriceIndexes['index'] == idx]
+                return "" if df.empty else df.iloc[0][year_col]
+
+            def to_str(v):
+                return "" if v is None else str(v)
 
             iCurrentYear = int(self.current_year)
-            special_lines = {219, 224}
 
-            # WRITE HARD VALUES
+            # WRITE HARD VALUES FROM aValues
+            # Faithfully filter by Rpt_sheet = sSheetTitle
             for _, r in self.dtAValue[self.dtAValue["rpt_sheet"] == sSheetTitle].iterrows():
                 aLine = int(r["aline"])
-                if aLine in special_lines:
-                    continue
-
-                iProcessYear = int(r["year"])
-                iROW_COUNT = aLine - iLineNumberOffset
-                aCol = to_str(r.get("acolumn", r.get("acol", r.get("aColumn", ""))))  # tolerant
-                value = to_str(r["value"])
-
-                if iProcessYear == iCurrentYear:
-                    # AnnPeriod (C1)
+                if aLine != 219 and aLine != 224:
+                    iProcessYear = int(r["year"])
+                    # drAnnPeriod (data dictionary row) by "Line = 'A3L{aLine}'"
                     dd = self.dtDataDictionary[self.dtDataDictionary["line"] == f"{sNamedRangePrefix}{aLine}"]
-                    if not dd.empty:
-                        set_cell(iROW_COUNT, 5, dd.iloc[0]["annperiod"], f"{sNamedRangePrefix}{aLine}C1")
-                    # C2 price index (Index 9)
-                    set_cell(iROW_COUNT, 7, get_pi9("current_year"), f"{sNamedRangePrefix}{aLine}C2", "0.0000")
-                    # C3..C8 based on aColumn 3..8
-                    if aCol == "3":
-                        set_cell(iROW_COUNT, 9,  value, f"{sNamedRangePrefix}{aLine}C3", "#,##0")
-                    if aCol == "4":
-                        formula_prefix = "=A3L215C4+A3L216C4+" if iROW_COUNT == 25 else ""
-                        set_cell(iROW_COUNT, 11, f"{formula_prefix}{value}", f"{sNamedRangePrefix}{aLine}C4", "#,##0")
-                    if aCol == "5":
-                        formula_prefix = "=A3L215C5+A3L216C5+" if iROW_COUNT == 25 else ""
-                        set_cell(iROW_COUNT, 13, f"{formula_prefix}{value}", f"{sNamedRangePrefix}{aLine}C5", "#,##0")
-                    if aCol == "6":
-                        set_cell(iROW_COUNT, 15, value, f"{sNamedRangePrefix}{aLine}C6", "#,##0")
-                    if aCol == "7":
-                        formula_prefix = "=A3L215C7+A3L216C7+" if iROW_COUNT == 25 else ""
-                        set_cell(iROW_COUNT, 17, f"{formula_prefix}{value}", f"{sNamedRangePrefix}{aLine}C7", "#,##0")
-                    if aCol == "8":
-                        formula_prefix = "=A3L215C8+A3L216C8+" if iROW_COUNT == 25 else ""
-                        set_cell(iROW_COUNT, 19, f"{formula_prefix}{value}", f"{sNamedRangePrefix}{aLine}C8", "#,##0")
+                    iROW_COUNT = aLine - iLineNumberOffset
 
-                elif iProcessYear == iCurrentYear - 1:
-                    set_cell(iROW_COUNT, 21, get_pi9("current_year_minus_1"), f"{sNamedRangePrefix}{aLine}C9", "0.0000")
-                    if aCol == "3":
-                        set_cell(iROW_COUNT, 23, value, f"{sNamedRangePrefix}{aLine}C10", "#,##0")
-                    if aCol == "4":
-                        prefix = "=A3L215C11+A3L216C11+" if iROW_COUNT == 25 else ""
-                        set_cell(iROW_COUNT, 25, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C11", "#,##0")
-                    if aCol == "5":
-                        prefix = "=A3L215C12+A3L216C12+" if iROW_COUNT == 25 else ""
-                        set_cell(iROW_COUNT, 27, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C12", "#,##0")
-                    if aCol == "6":
-                        set_cell(iROW_COUNT, 29, value, f"{sNamedRangePrefix}{aLine}C13", "#,##0")
-                    if aCol == "7":
-                        prefix = "=A3L215C14+A3L216C14+" if iROW_COUNT == 25 else ""
-                        set_cell(iROW_COUNT, 31, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C14", "#,##0")
-                    if aCol == "8":
-                        prefix = "=A3L215C15+A3L216C15+" if iROW_COUNT == 25 else ""
-                        set_cell(iROW_COUNT, 33, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C15", "#,##0")
+                    if iProcessYear == iCurrentYear:
+                        # C1 (column 5) = AnnPeriod
+                        if not dd.empty:
+                            set_cell(iROW_COUNT, 5, to_str(dd.iloc[0]["annperiod"]), f"{sNamedRangePrefix}{aLine}C1")
+                        # C2 (column 7) = Price Index #9 current year
+                        set_cell(iROW_COUNT, 7, get_pi(9, "current_year"), f"{sNamedRangePrefix}{aLine}C2", "0.0000")
 
-                elif iProcessYear == iCurrentYear - 2:
-                    set_cell(iROW_COUNT, 35, get_pi9("current_year_minus_2"), f"{sNamedRangePrefix}{aLine}C16", "0.0000")
-                    if aCol == "3":
-                        set_cell(iROW_COUNT, 37, value, f"{sNamedRangePrefix}{aLine}C17", "#,##0")
-                    if aCol == "4":
-                        prefix = "=A3L215C18+A3L216C18+" if iROW_COUNT == 25 else ""
-                        set_cell(iROW_COUNT, 39, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C18", "#,##0")
-                    if aCol == "5":
-                        prefix = "=A3L215C19+A3L216C19+" if iROW_COUNT == 25 else ""
-                        set_cell(iROW_COUNT, 41, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C19", "#,##0")
-                    if aCol == "6":
-                        set_cell(iROW_COUNT, 43, value, f"{sNamedRangePrefix}{aLine}C20", "#,##0")
-                    if aCol == "7":
-                        prefix = "=A3L215C21+A3L216C21+" if iROW_COUNT == 25 else ""
-                        set_cell(iROW_COUNT, 45, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C21", "#,##0")
-                    if aCol == "8":
-                        prefix = "=A3L215C22+A3L216C22+" if iROW_COUNT == 25 else ""
-                        set_cell(iROW_COUNT, 47, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C22", "#,##0")
+                        # C3..C8 based on aColumn - each IF should be separate to match VB logic
+                        if to_str(r["acolumn"]) == "3":
+                            set_cell(iROW_COUNT, 9, to_str(r["value"]), f"{sNamedRangePrefix}{aLine}C3", "#,##0")
+                        if to_str(r["acolumn"]) == "4":
+                            val = (f"=A3L215C4+A3L216C4+{to_str(r['value'])}" if iROW_COUNT == 25 else to_str(r["value"]))
+                            set_cell(iROW_COUNT, 11, val, f"{sNamedRangePrefix}{aLine}C4", "#,##0")
+                        if to_str(r["acolumn"]) == "5":
+                            val = (f"=A3L215C5+A3L216C5+{to_str(r['value'])}" if iROW_COUNT == 25 else to_str(r["value"]))
+                            set_cell(iROW_COUNT, 13, val, f"{sNamedRangePrefix}{aLine}C5", "#,##0")
+                        if to_str(r["acolumn"]) == "6":
+                            set_cell(iROW_COUNT, 15, to_str(r["value"]), f"{sNamedRangePrefix}{aLine}C6", "#,##0")
+                        if to_str(r["acolumn"]) == "7":
+                            val = (f"=A3L215C7+A3L216C7+{to_str(r['value'])}" if iROW_COUNT == 25 else to_str(r["value"]))
+                            set_cell(iROW_COUNT, 17, val, f"{sNamedRangePrefix}{aLine}C7", "#,##0")
+                        if to_str(r["acolumn"]) == "8":
+                            val = (f"=A3L215C8+A3L216C8+{to_str(r['value'])}" if iROW_COUNT == 25 else to_str(r["value"]))
+                            set_cell(iROW_COUNT, 19, val, f"{sNamedRangePrefix}{aLine}C8", "#,##0")
 
-                elif iProcessYear == iCurrentYear - 3:
-                    set_cell(iROW_COUNT, 49, get_pi9("current_year_minus_3"), f"{sNamedRangePrefix}{aLine}C23", "0.0000")
-                    if aCol == "3":
-                        set_cell(iROW_COUNT, 51, value, f"{sNamedRangePrefix}{aLine}C24", "#,##0")
-                    if aCol == "4":
-                        prefix = "=A3L215C25+A3L216C25+" if iROW_COUNT == 25 else ""
-                        set_cell(iROW_COUNT, 53, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C25", "#,##0")
-                    if aCol == "5":
-                        prefix = "=A3L215C26+A3L216C26+" if iROW_COUNT == 25 else ""
-                        set_cell(iROW_COUNT, 55, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C26", "#,##0")
-                    if aCol == "6":
-                        set_cell(iROW_COUNT, 57, value, f"{sNamedRangePrefix}{aLine}C27", "#,##0")
-                    if aCol == "7":
-                        prefix = "=A3L215C28+A3L216C28+" if iROW_COUNT == 25 else ""
-                        set_cell(iROW_COUNT, 59, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C28", "#,##0")
-                    if aCol == "8":
-                        prefix = "=A3L215C29+A3L216C29+" if iROW_COUNT == 25 else ""
-                        set_cell(iROW_COUNT, 61, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C29", "#,##0")
+                    elif iProcessYear == iCurrentYear - 1:
+                        set_cell(iROW_COUNT, 21, get_pi(9, "current_year_minus_1"), f"{sNamedRangePrefix}{aLine}C9", "0.0000")
+                        if to_str(r["acolumn"]) == "3":
+                            set_cell(iROW_COUNT, 23, to_str(r["value"]), f"{sNamedRangePrefix}{aLine}C10", "#,##0")
+                        if to_str(r["acolumn"]) == "4":
+                            val = (f"=A3L215C11+A3L216C11+{to_str(r['value'])}" if iROW_COUNT == 25 else to_str(r["value"]))
+                            set_cell(iROW_COUNT, 25, val, f"{sNamedRangePrefix}{aLine}C11", "#,##0")
+                        if to_str(r["acolumn"]) == "5":
+                            val = (f"=A3L215C12+A3L216C12+{to_str(r['value'])}" if iROW_COUNT == 25 else to_str(r["value"]))
+                            set_cell(iROW_COUNT, 27, val, f"{sNamedRangePrefix}{aLine}C12", "#,##0")
+                        if to_str(r["acolumn"]) == "6":
+                            set_cell(iROW_COUNT, 29, to_str(r["value"]), f"{sNamedRangePrefix}{aLine}C13", "#,##0")
+                        if to_str(r["acolumn"]) == "7":
+                            val = (f"=A3L215C14+A3L216C14+{to_str(r['value'])}" if iROW_COUNT == 25 else to_str(r["value"]))
+                            set_cell(iROW_COUNT, 31, val, f"{sNamedRangePrefix}{aLine}C14", "#,##0")
+                        if to_str(r["acolumn"]) == "8":
+                            val = (f"=A3L215C15+A3L216C15+{to_str(r['value'])}" if iROW_COUNT == 25 else to_str(r["value"]))
+                            set_cell(iROW_COUNT, 33, val, f"{sNamedRangePrefix}{aLine}C15", "#,##0")
 
-                elif iProcessYear == iCurrentYear - 4:
-                    set_cell(iROW_COUNT, 63, get_pi9("current_year_minus_4"), f"{sNamedRangePrefix}{aLine}C30", "0.0000")
-                    if aCol == "3":
-                        set_cell(iROW_COUNT, 65, value, f"{sNamedRangePrefix}{aLine}C31", "#,##0")
-                    if aCol == "4":
-                        prefix = "=A3L215C32+A3L216C32+" if iROW_COUNT == 25 else ""
-                        set_cell(iROW_COUNT, 67, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C32", "#,##0")
-                    if aCol == "5":
-                        prefix = "=A3L215C33+A3L216C33+" if iROW_COUNT == 25 else ""
-                        set_cell(iROW_COUNT, 69, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C33", "#,##0")
-                    if aCol == "6":
-                        set_cell(iROW_COUNT, 71, value, f"{sNamedRangePrefix}{aLine}C34", "#,##0")
-                    if aCol == "7":
-                        prefix = "=A3L215C35+A3L216C35+" if iROW_COUNT == 25 else ""
-                        set_cell(iROW_COUNT, 73, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C35", "#,##0")
-                    if aCol == "8":
-                        prefix = "=A3L215C36+A3L216C36+" if iROW_COUNT == 25 else ""
-                        set_cell(iROW_COUNT, 75, f"{prefix}{value}", f"{sNamedRangePrefix}{aLine}C36", "#,##0")
+                    elif iProcessYear == iCurrentYear - 2:
+                        set_cell(iROW_COUNT, 35, get_pi(9, "current_year_minus_2"), f"{sNamedRangePrefix}{aLine}C16", "0.0000")
+                        if to_str(r["acolumn"]) == "3":
+                            set_cell(iROW_COUNT, 37, to_str(r["value"]), f"{sNamedRangePrefix}{aLine}C17", "#,##0")
+                        if to_str(r["acolumn"]) == "4":
+                            val = (f"=A3L215C18+A3L216C18+{to_str(r['value'])}" if iROW_COUNT == 25 else to_str(r["value"]))
+                            set_cell(iROW_COUNT, 39, val, f"{sNamedRangePrefix}{aLine}C18", "#,##0")
+                        if to_str(r["acolumn"]) == "5":
+                            val = (f"=A3L215C19+A3L216C19+{to_str(r['value'])}" if iROW_COUNT == 25 else to_str(r["value"]))
+                            set_cell(iROW_COUNT, 41, val, f"{sNamedRangePrefix}{aLine}C19", "#,##0")
+                        if to_str(r["acolumn"]) == "6":
+                            set_cell(iROW_COUNT, 43, to_str(r["value"]), f"{sNamedRangePrefix}{aLine}C20", "#,##0")
+                        if to_str(r["acolumn"]) == "7":
+                            val = (f"=A3L215C21+A3L216C21+{to_str(r['value'])}" if iROW_COUNT == 25 else to_str(r["value"]))
+                            set_cell(iROW_COUNT, 45, val, f"{sNamedRangePrefix}{aLine}C21", "#,##0")
+                        if to_str(r["acolumn"]) == "8":
+                            val = (f"=A3L215C22+A3L216C22+{to_str(r['value'])}" if iROW_COUNT == 25 else to_str(r["value"]))
+                            set_cell(iROW_COUNT, 47, val, f"{sNamedRangePrefix}{aLine}C22", "#,##0")
 
-            # SOURCES
+                    elif iProcessYear == iCurrentYear - 3:
+                        set_cell(iROW_COUNT, 49, get_pi(9, "current_year_minus_3"), f"{sNamedRangePrefix}{aLine}C23", "0.0000")
+                        if to_str(r["acolumn"]) == "3":
+                            set_cell(iROW_COUNT, 51, to_str(r["value"]), f"{sNamedRangePrefix}{aLine}C24", "#,##0")
+                        if to_str(r["acolumn"]) == "4":
+                            val = (f"=A3L215C25+A3L216C25+{to_str(r['value'])}" if iROW_COUNT == 25 else to_str(r["value"]))
+                            set_cell(iROW_COUNT, 53, val, f"{sNamedRangePrefix}{aLine}C25", "#,##0")
+                        if to_str(r["acolumn"]) == "5":
+                            val = (f"=A3L215C26+A3L216C26+{to_str(r['value'])}" if iROW_COUNT == 25 else to_str(r["value"]))
+                            set_cell(iROW_COUNT, 55, val, f"{sNamedRangePrefix}{aLine}C26", "#,##0")
+                        if to_str(r["acolumn"]) == "6":
+                            set_cell(iROW_COUNT, 57, to_str(r["value"]), f"{sNamedRangePrefix}{aLine}C27", "#,##0")
+                        if to_str(r["acolumn"]) == "7":
+                            val = (f"=A3L215C28+A3L216C28+{to_str(r['value'])}" if iROW_COUNT == 25 else to_str(r["value"]))
+                            set_cell(iROW_COUNT, 59, val, f"{sNamedRangePrefix}{aLine}C28", "#,##0")
+                        if to_str(r["acolumn"]) == "8":
+                            val = (f"=A3L215C29+A3L216C29+{to_str(r['value'])}" if iROW_COUNT == 25 else to_str(r["value"]))
+                            set_cell(iROW_COUNT, 61, val, f"{sNamedRangePrefix}{aLine}C29", "#,##0")
+
+                    elif iProcessYear == iCurrentYear - 4:
+                        set_cell(iROW_COUNT, 63, get_pi(9, "current_year_minus_4"), f"{sNamedRangePrefix}{aLine}C30", "0.0000")
+                        if to_str(r["acolumn"]) == "3":
+                            set_cell(iROW_COUNT, 65, to_str(r["value"]), f"{sNamedRangePrefix}{aLine}C31", "#,##0")
+                        if to_str(r["acolumn"]) == "4":
+                            val = (f"=A3L215C32+A3L216C32+{to_str(r['value'])}" if iROW_COUNT == 25 else to_str(r["value"]))
+                            set_cell(iROW_COUNT, 67, val, f"{sNamedRangePrefix}{aLine}C32", "#,##0")
+                        if to_str(r["acolumn"]) == "5":
+                            val = (f"=A3L215C33+A3L216C33+{to_str(r['value'])}" if iROW_COUNT == 25 else to_str(r["value"]))
+                            set_cell(iROW_COUNT, 69, val, f"{sNamedRangePrefix}{aLine}C33", "#,##0")
+                        if to_str(r["acolumn"]) == "6":
+                            set_cell(iROW_COUNT, 71, to_str(r["value"]), f"{sNamedRangePrefix}{aLine}C34", "#,##0")
+                        if to_str(r["acolumn"]) == "7":
+                            val = (f"=A3L215C35+A3L216C35+{to_str(r['value'])}" if iROW_COUNT == 25 else to_str(r["value"]))
+                            set_cell(iROW_COUNT, 73, val, f"{sNamedRangePrefix}{aLine}C35", "#,##0")
+                        if to_str(r["acolumn"]) == "8":
+                            val = (f"=A3L215C36+A3L216C36+{to_str(r['value'])}" if iROW_COUNT == 25 else to_str(r["value"]))
+                            set_cell(iROW_COUNT, 75, val, f"{sNamedRangePrefix}{aLine}C36", "#,##0")
+
+            # WRITE OUT THE SOURCES AND ANY VALUES THAT EXECUTE THE SOURCE
             for _, dr in self.dtLineSourceText[self.dtLineSourceText["rpt_sheet"] == sSheetTitle].iterrows():
                 line = int(dr["line"])
                 iLine = line - iLineNumberOffset
 
-                # C1..C43 -> cols 4..88 (even)
-                for idx, col in enumerate(range(4, 89, 2), start=1):
-                    key = f"c{idx}"
-                    ws.cell(row=iLine, column=col, value=apostrophe(self.scrub_year(to_str(dr.get(key, "")), iCurrentYear)))
+                # Sources first: C1..C43 -> cols 4,6,8,...88 (even cols), as text with leading apostrophe
+                source_columns = [4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 86, 88]
+                for idx, col in enumerate(source_columns, start=1):
+                    key = f"c{idx}" if f"c{idx}" in dr else f"C{idx}"
+                    src = self.scrub_year(to_str(dr.get(key, "")), iCurrentYear)
+                    ws.cell(row=iLine, column=col, value=f"'{src}")
 
-                if line in special_lines:
-                    # Many NULLs + scrubbed numbers pattern
-                    def put(col, cnum, kind):
-                        if kind == "NULL":
-                            set_cell(iLine, col, "=NULL_VALUE", f"{sNamedRangePrefix}{line}{cnum}")
-                        else:
-                            set_cell(iLine, col, self.scrub_year(to_str(dr[cnum.lower()]), iCurrentYear),
-                                    f"{sNamedRangePrefix}{line}{cnum}", "#,##0")
+                if line == 219 or line == 224:
+                    # Special: write NULL_VALUE or numeric per VB
+                    set_cell(iLine, 5, "=NULL_VALUE", f"{sNamedRangePrefix}{line}C1").alignment = Alignment(horizontal="right")
+                    c = set_cell(iLine, 7, "=NULL_VALUE", f"{sNamedRangePrefix}{line}C2")
+                    c.number_format = "#,##0"; c.alignment = Alignment(horizontal="right")
 
-                    put(5,  "C1",  "NULL"); put(7,  "C2",  "NULL")
-                    put(9,  "C3",  "VAL");  put(11, "C4",  "VAL")
-                    put(13, "C5",  "VAL");  put(15, "C6",  "VAL")
-                    put(17, "C7",  "VAL");  put(19, "C8",  "VAL")
-                    put(21, "C9",  "NULL"); put(23, "C10", "VAL")
-                    put(25, "C11", "VAL");  put(27, "C12", "VAL")
-                    put(29, "C13", "VAL");  put(31, "C14", "VAL")
-                    put(33, "C15", "VAL");  put(35, "C16", "NULL")
-                    put(37, "C17", "VAL");  put(39, "C18", "VAL")
-                    put(41, "C19", "VAL");  put(43, "C20", "VAL")
-                    put(45, "C21", "VAL");  put(47, "C22", "VAL")
-                    put(49, "C23", "NULL"); put(51, "C24", "VAL")
-                    put(53, "C25", "VAL");  put(55, "C26", "VAL")
-                    put(57, "C27", "VAL");  put(59, "C28", "VAL")
-                    put(61, "C29", "VAL");  put(63, "C30", "NULL")
-                    put(65, "C31", "VAL");  put(67, "C32", "VAL")
-                    put(69, "C33", "VAL");  put(71, "C34", "VAL")
-                    put(73, "C35", "VAL");  put(75, "C36", "VAL")
-                    put(77, "C37", "VAL");  put(79, "C38", "VAL")
-                    put(81, "C39", "VAL");  put(83, "C40", "VAL")
-                    put(85, "C41", "VAL");  put(87, "C42", "VAL")
-                    put(89, "C43", "VAL")
+                    def put_num(col, cname):
+                        c = set_cell(iLine, col, self.scrub_year(to_str(dr[cname.lower() if cname.lower() in dr else cname]), iCurrentYear),
+                                    f"{sNamedRangePrefix}{line}{cname}", "#,##0")
+                        return c
+
+                    for col, cname in [(9,"C3"),(11,"C4"),(13,"C5"),(15,"C6"),(17,"C7"),(19,"C8")]:
+                        put_num(col, cname)
+
+                    set_cell(iLine, 21, "=NULL_VALUE", f"{sNamedRangePrefix}{line}C9").alignment = Alignment(horizontal="right")
+
+                    for col, cname in [(23,"C10"),(25,"C11"),(27,"C12"),(29,"C13"),(31,"C14"),(33,"C15")]:
+                        put_num(col, cname)
+
+                    set_cell(iLine, 35, "=NULL_VALUE", f"{sNamedRangePrefix}{line}C16").alignment = Alignment(horizontal="right")
+
+                    for col, cname in [(37,"C17"),(39,"C18"),(41,"C19"),(43,"C20"),(45,"C21"),(47,"C22")]:
+                        put_num(col, cname)
+
+                    set_cell(iLine, 49, "=NULL_VALUE", f"{sNamedRangePrefix}{line}C23").alignment = Alignment(horizontal="right")
+
+                    for col, cname in [(51,"C24"),(53,"C25"),(55,"C26"),(57,"C27"),(59,"C28"),(61,"C29")]:
+                        put_num(col, cname)
+
+                    set_cell(iLine, 63, "=NULL_VALUE", f"{sNamedRangePrefix}{line}C30").alignment = Alignment(horizontal="right")
+
+                    for col, cname in [(65,"C31"),(67,"C32"),(69,"C33"),(71,"C34"),(73,"C35"),(75,"C36"),
+                                    (77,"C37"),(79,"C38"),(81,"C39"),(83,"C40"),(85,"C41"),(87,"C42"),(89,"C43")]:
+                        put_num(col, cname)
+
                 else:
-                    # Create sources for C37..C42 into columns (76/77), (78/79), ..., (86/87)
-                    for k, base_col in zip(range(3, 9), [76, 78, 80, 82, 84, 86]):
-                        sSource = self.get_source_for_a3p2_summary_column(ws, line, iLine, k)
-                        ws.cell(row=iLine, column=base_col, value=apostrophe(sSource) if len(sSource) > 0 else "")
-                        set_cell(iLine, base_col + 1, sSource, f"{sNamedRangePrefix}{line}C{36 + k}", "#,##0")
+                    # Create source for C37..C42 (notes in even cols 76,78,.. and values in odd cols 77,79,..)
+                    for k, (note_col, val_col, cname, arg_col) in enumerate(
+                        [(76,77,"C37",3),(78,79,"C38",4),(80,81,"C39",5),
+                        (82,83,"C40",6),(84,85,"C41",7),(86,87,"C42",8)], start=0
+                    ):
+                        sSource = self.get_source_for_a3p2_summary_column(ws, line, iLine, arg_col)
+                        ws.cell(row=iLine, column=note_col, value=(f"'{sSource}" if len(sSource) > 0 else ""))
+                        set_cell(iLine, val_col, sSource, f"{sNamedRangePrefix}{line}{cname}", "#,##0")
 
-                    # C43 is just scrubbed text -> numeric cell with format
-                    set_cell(iLine, 89, self.scrub_year(to_str(dr.get("c43", "")), iCurrentYear),
-                            f"{sNamedRangePrefix}{line}C43", "#,##0")
+                    # C43 numeric (col 89) from source table (with scrub), as in VB
+                    c43 = self.scrub_year(to_str(dr["c43" if "c43" in dr else "C43"]), iCurrentYear)
+                    set_cell(iLine, 89, c43, f"{sNamedRangePrefix}{line}C43", "#,##0")
 
             self.format_all_cells(ws)
             print(f"{sSheetTitle} completed")
+
         except Exception as ex:
             print(f"Error in {sSheetTitle}: {ex}")
             import traceback; print(traceback.format_exc())
+            # faithful error handler call analog (if you want parity with VB's DB logging):
+            # self.oDB.HandleError(str(self.current_year), "Error", str(ex), traceback.format_exc(), "A3P2")
 
 
     # --------------------------

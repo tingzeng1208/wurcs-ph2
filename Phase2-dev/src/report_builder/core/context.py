@@ -4,15 +4,16 @@ from typing import Optional
 import pandas as pd
 from currentDF import CurrentDF
 from openpyxl.styles import Font, Alignment, Border, Side
-import os, sys
+from utils.utility import to_str
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-utils_dir = os.path.join(current_dir, "..", "..", "utils")
 
-if utils_dir not in sys.path:
-    sys.path.append(utils_dir)
+# current_dir = os.path.dirname(os.path.abspath(__file__))
+# utils_dir = os.path.join(current_dir, "..", "..", "utils")
+
+# if utils_dir not in sys.path:
+#     sys.path.append(utils_dir)
     
-from utility import to_str  # type: ignore
+  # type: ignore
 
 @dataclass
 class ReportContext:
@@ -25,7 +26,6 @@ class ReportContext:
     # dataframes (use default_factory to avoid mutable-default pitfalls)
     dtTitles: pd.DataFrame = field(default_factory=pd.DataFrame)
     dtFootnotes: pd.DataFrame = field(default_factory=pd.DataFrame)
-    dtAValue: pd.DataFrame = field(default_factory=pd.DataFrame)
     dtAValue0_RR: pd.DataFrame = field(default_factory=pd.DataFrame)
     dtAValueRegion_RR: pd.DataFrame = field(default_factory=pd.DataFrame)
     dtPriceIndexes: pd.DataFrame = field(default_factory=pd.DataFrame)
@@ -125,9 +125,6 @@ class ReportContext:
             if row and row[0].row > 5:
                 for cell in row:
                     cell.font = font 
-                    
-    def to_str(self, value):
-        return str(value)
         
     def scrub_year(self, s: str, current_year: int) -> str:
         s = s.replace("#Y#", str(current_year))
@@ -275,3 +272,106 @@ class ReportContext:
             ws.cell(row=iROW_COUNT, column=2, value=to_str(drRow["no"]))
             ws.cell(row=iROW_COUNT, column=3, value=to_str(drRow["text"]))
             iROW_COUNT += 1
+            
+    def get_source_for_a2_summary_column(self, ws, line_number, cell_line_number):
+        sReturn = ""
+
+        oCell = ws.cell(row=cell_line_number, column=5)
+        try:
+            iPeriod = int(oCell.value) if oCell.value is not None else 0
+        except (ValueError, TypeError):
+            iPeriod = 0
+
+        if iPeriod > 0:
+            sReturn = "=SUM(A2L" + str(line_number) + "C10"
+
+            if iPeriod > 1:
+                sReturn = sReturn + ",PRODUCT(A2L" + str(line_number) + "C12,A2L" + str(line_number) + "C13),PRODUCT(A2L" + str(line_number) + "C14,A2L" + str(line_number) + "C15),PRODUCT(A2L" + str(line_number) + "C16,A2L" + str(line_number) + "C17),PRODUCT(A2L" + str(line_number) + "C18,A2L" + str(line_number) + "C19)"
+            if iPeriod > 2:
+                sReturn = sReturn + ",PRODUCT(A2L" + str(line_number) + "C20,A2L" + str(line_number) + "C21),PRODUCT(A2L" + str(line_number) + "C22,A2L" + str(line_number) + "C23),PRODUCT(A2L" + str(line_number) + "C24,A2L" + str(line_number) + "C25),PRODUCT(A2L" + str(line_number) + "C26,A2L" + str(line_number) + "C27)"
+            if iPeriod > 3:
+                sReturn = sReturn + ",PRODUCT(A2L" + str(line_number) + "C28,A2L" + str(line_number) + "C29),PRODUCT(A2L" + str(line_number) + "C30,A2L" + str(line_number) + "C31),PRODUCT(A2L" + str(line_number) + "C32,A2L" + str(line_number) + "C33),PRODUCT(A2L" + str(line_number) + "C34,A2L" + str(line_number) + "C35)"
+            if iPeriod > 4:
+                sReturn = sReturn + ",PRODUCT(A2L" + str(line_number) + "C36,A2L" + str(line_number) + "C37),PRODUCT(A2L" + str(line_number) + "C38,A2L" + str(line_number) + "C39),PRODUCT(A2L" + str(line_number) + "C40,A2L" + str(line_number) + "C41),PRODUCT(A2L" + str(line_number) + "C42,A2L" + str(line_number) + "C43)"
+
+            sReturn = sReturn + ")/A2L" + str(line_number) + "C1"
+
+            # print(f"Source for line {line_number} (cell line {cell_line_number}): {sReturn}")
+        else:
+            sReturn = ""
+
+        return sReturn
+    
+    def get_source_for_a3p1_summary_column(self, ws, line_number, cell_line_number):
+        sReturn = ""
+        
+        sline_number = str(line_number)
+        oCell = ws.cell(row=cell_line_number, column=5)
+        try:
+            iPeriod = int(oCell.value) if oCell.value is not None else 0
+        except (ValueError, TypeError):
+            iPeriod = 0
+
+        if iPeriod > 0:
+            sReturn = "=SUM(PRODUCT(A3L" + sline_number + "C2,A3L" + sline_number + "C3)"
+
+            if iPeriod > 1:
+                sReturn = sReturn + ",PRODUCT(A3L" + sline_number + "C4,A3L" + sline_number + "C5)"
+            if iPeriod > 2:
+                sReturn = sReturn + ",PRODUCT(A3L" + sline_number + "C6,A3L" + sline_number + "C7)"
+            if iPeriod > 3:
+                sReturn = sReturn + ",PRODUCT(A3L" + sline_number + "C8,A3L" + sline_number + "C9)"
+            if iPeriod > 4:
+                sReturn = sReturn + ",PRODUCT(A3L" + sline_number + "C10,A3L" + sline_number + "C11)"
+
+            sReturn = sReturn + ")/A3L" + sline_number + "C1"
+        else:
+            sReturn = ""
+
+        return sReturn
+
+
+    def get_source_for_a3p2_summary_column(self, ws, line_number, cell_line_number, column_number):
+        sReturn = ""
+        
+        sline_number = str(line_number)
+        oCell = ws.cell(row=cell_line_number, column=5)
+        try:
+            iPeriod = int(oCell.value) if oCell.value is not None else 0
+        except (ValueError, TypeError):
+            iPeriod = 0
+
+        if iPeriod > 0:
+            sReturn = "=SUM(PRODUCT(A3L" + sline_number + "C2,A3L" + sline_number + "C" + str(column_number) + ")"
+
+            if iPeriod > 1:
+                sReturn = sReturn + ",PRODUCT(A3L" + sline_number + "C9,A3L" + sline_number + "C" + str(column_number + 7) + ")"
+            if iPeriod > 2:
+                sReturn = sReturn + ",PRODUCT(A3L" + sline_number + "C16,A3L" + sline_number + "C" + str(column_number + 14) + ")"
+            if iPeriod > 3:
+                sReturn = sReturn + ",PRODUCT(A3L" + sline_number + "C23,A3L" + sline_number + "C" + str(column_number + 21) + ")"
+            if iPeriod > 4:
+                sReturn = sReturn + ",PRODUCT(A3L" + sline_number + "C30,A3L" + sline_number + "C" + str(column_number + 28) + ")"
+
+            sReturn = sReturn + ")/A3L" + sline_number + "C1"
+        else:
+            sReturn = ""
+
+        return sReturn
+
+
+    def get_source_for_a3p3to_p8_summary_column(self, line, iLine):
+        """
+        VB: GetSourceForA3P3toP8SummaryColumn(line, iLine)
+        Purpose: return the source string for the C12 (last) column on A3P3..A3P8
+                when the row is NOT one of the special derived rows.
+        Implementation: pull C12 from dtLineSourceText for the given line and scrub it.
+        """
+        try:
+            row = self.dtLineSourceText[self.dtLineSourceText["line"].astype(str) == str(line)]
+            if row.empty:
+                return ""
+            s = to_str(row.iloc[0].get("c12", ""))
+            return self.scrub_year(s, int(self.current_year))
+        except Exception:
+            return ""

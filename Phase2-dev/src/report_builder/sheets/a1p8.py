@@ -4,6 +4,36 @@ from openpyxl.workbook.defined_name import DefinedName
 from report_builder.core.registry import register
 from report_builder.core.context import ReportContext
 
+def process_numeric_value(value):
+    """Convert string/numeric value to appropriate type for Excel"""
+    if value is None or value == "":
+        return ""
+    
+    # If it's already a number, return as-is
+    if isinstance(value, (int, float)):
+        # Convert float to int if it's a whole number
+        if isinstance(value, float) and value.is_integer():
+            return int(value)
+        return value
+    
+    # Try to convert string to number
+    try:
+        str_val = str(value).strip()
+        if str_val == "":
+            return ""
+            
+        # Try integer conversion first
+        if '.' not in str_val and 'e' not in str_val.lower():
+            return int(float(str_val))  # Use float() first to handle scientific notation
+        else:
+            # If it's a decimal, check if it's actually a whole number
+            float_val = float(str_val)
+            if float_val.is_integer():
+                return int(float_val)
+            return float_val
+    except (ValueError, TypeError):
+        return str(value)  # Return as string if conversion fails
+
 @register("A1P8_worksheet")
 def A1P8_worksheet(ctx: ReportContext, wb: Workbook):
     try:
@@ -46,7 +76,8 @@ def A1P8_worksheet(ctx: ReportContext, wb: Workbook):
         ]
         for _, draValueRegion in filtered_region_values.iterrows():
             iROW_COUNT = int(draValueRegion["aline"]) - iLineNumberOffset
-            cell = ws.cell(row=iROW_COUNT, column=5, value=draValueRegion["value"])
+            cell_value = process_numeric_value(draValueRegion["value"])
+            cell = ws.cell(row=iROW_COUNT, column=5, value=cell_value)
             named_range = f"{sNamedRangePrefix}{draValueRegion['aline']}C1"
             wb.defined_names[named_range] = DefinedName(name=named_range, attr_text=f"'{sSheetTitle}'!${cell.column_letter}${cell.row}")
 
@@ -59,7 +90,8 @@ def A1P8_worksheet(ctx: ReportContext, wb: Workbook):
         ]
         for _, draValue0 in filtered_zero_rr.iterrows():
             iROW_COUNT = int(draValue0["aline"]) - iLineNumberOffset
-            cell = ws.cell(row=iROW_COUNT, column=5, value=draValue0["value"])
+            cell_value = process_numeric_value(draValue0["value"])
+            cell = ws.cell(row=iROW_COUNT, column=5, value=cell_value)
             named_range = f"{sNamedRangePrefix}{draValue0['aline']}C1"
             wb.defined_names[named_range] = DefinedName(name=named_range, attr_text=f"'{sSheetTitle}'!${cell.column_letter}${cell.row}")
 
@@ -71,7 +103,8 @@ def A1P8_worksheet(ctx: ReportContext, wb: Workbook):
         ]
         for _, draValue in filtered_rr_values.iterrows():
             iROW_COUNT = int(draValue["aline"]) - iLineNumberOffset
-            cell = ws.cell(row=iROW_COUNT, column=5, value=draValue["value"])
+            cell_value = process_numeric_value(draValue["value"])
+            cell = ws.cell(row=iROW_COUNT, column=5, value=cell_value)
             named_range = f"{sNamedRangePrefix}{draValue['aline']}C1"
             wb.defined_names[named_range] = DefinedName(name=named_range, attr_text=f"'{sSheetTitle}'!${cell.column_letter}${cell.row}")
 

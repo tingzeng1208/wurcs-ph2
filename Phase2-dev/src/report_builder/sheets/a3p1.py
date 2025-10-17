@@ -3,14 +3,7 @@ from openpyxl.styles import Font, Alignment, Border, Side
 from openpyxl.workbook.defined_name import DefinedName
 from report_builder.core.registry import register
 from report_builder.core.context import ReportContext
-
-def to_str(value):
-    """Helper function to convert value to string safely"""
-    return str(value) if value is not None else ""
-
-def apostrophe(text):
-    """Add apostrophe prefix if text starts with = or +"""
-    return f"'{text}" if text.startswith(('=', '+')) else text
+from utils.utility import to_str, apostrophe, scrub_year
 
 @register("A3P1_worksheet")
 def A3P1_worksheet(ctx: ReportContext, wb: Workbook):
@@ -62,7 +55,7 @@ def A3P1_worksheet(ctx: ReportContext, wb: Workbook):
         def get_pi(index, year_col_name, value_str):
             if str(value_str) in ("0", "0.0") or value_str == 0:
                 return "0"
-            df = ctx.dtPriceIndexes[ctx.dtPriceIndexes['index'] == index]
+            df = ctx.variable_ctx.dtPriceIndexes[ctx.variable_ctx.dtPriceIndexes['index'] == index]
             return "0" if df.empty else df.iloc[0][year_col_name]
 
         iCurrentYear = int(ctx.current_year)
